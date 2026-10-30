@@ -13,11 +13,11 @@ Open **Expo Go** on your iPhone, scan the QR code (same Wi-Fi as the computer).
 
 ## Scripts
 
-| Command                 | What it does                                  |
-| ----------------------- | --------------------------------------------- |
-| `npm run typecheck`     | TypeScript check                              |
-| `npm run lint`          | ESLint + Prettier                             |
-| `npm test`              | Jest unit tests                               |
+| Command                 | What it does                                   |
+| ----------------------- | ---------------------------------------------- |
+| `npm run typecheck`     | TypeScript check                               |
+| `npm run lint`          | ESLint + Prettier                              |
+| `npm test`              | Jest unit tests                                |
 | `npm run check:privacy` | Fails if network calls appear in `src/`/`app/` |
 
 ## Privacy
