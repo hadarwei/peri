@@ -30,7 +30,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
-    "test": "jest"
+    "test": "jest",
+    "check:privacy": "bash scripts/check-no-network.sh"
   },
   "private": true,
   "jest": {
