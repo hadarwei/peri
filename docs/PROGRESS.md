@@ -1,0 +1,1 @@
+- Stage 0 (setup): Expo + TS, lint/prettier, Jest, privacy guard — done 2026-10-30
