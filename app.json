@@ -23,6 +23,11 @@
     },
     "updates": {
       "enabled": false
-    }
+    },
+    "scheme": "peri",
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {}
   }
 }
