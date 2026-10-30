@@ -26,16 +26,18 @@
       "status": "in_progress",
       "done": [
         "P1.1 tabs + rtl",
-        "P1.2 i18n (src/i18n)",
-        "P1.3 theme + Rubik (src/theme)"
+        "P1.2 i18n",
+        "P1.3 theme + Rubik",
+        "fix: explicit rtl direction on root view (awaiting phone check)",
+        "P1.4 sqlite + migration runner"
       ],
       "next": [
-        "CHECK 1a (phone)",
-        "P1.4 sqlite + migrations",
-        "P1.5 schema",
+        "P1.5 schema (migration 001)",
         "P1.6 date utils",
+        "CHECK 1b",
         "P1.7 repos",
-        "P1.8 smoke screen"
+        "P1.8 smoke screen",
+        "CHECK 1c + merge"
       ]
     },
     "2": {
@@ -98,9 +100,9 @@
     }
   },
   "modules": {
-    "src/rtl.ts": "forces RTL for Hebrew (applies after restart on iOS - to verify)",
+    "src/rtl.ts": "forceRTL (not reliable in Expo Go); app/_layout.tsx sets direction rtl explicitly",
     "src/core": "pure logic (dates, prediction, phase, insights, streak) - planned",
-    "src/db": "sqlite + migrations + repos - planned",
+    "src/db": "getDb() opens peri.db; runMigrations(db, migrations) transactional; Db interface is fakeable in tests; migrations/ currently empty",
     "src/i18n": "typed Hebrew strings + t(key)",
     "src/theme": "colors, spacing, radii, typography; Rubik bundled from npm (no network)"
   },
