@@ -67,13 +67,12 @@
       "done": [
         "P3.1/3.2 getTodayCards (src/core/todayCards.ts) tests first, 19 cases",
         "P3.3 check-in modal (app/checkin.tsx): mood, same as yesterday, top-3 symptom chips (topSymptoms), collapsed more details (flow/pain/energy/note)",
-        "P3.4 saving: saveCheckIn (day log + checkins in one transaction), prefill, same-as-yesterday, duck celebrates; Today mood row saves quickly"
+        "P3.4 saving: saveCheckIn (day log + checkins in one transaction), prefill, same-as-yesterday, duck celebrates; Today mood row saves quickly",
+        "P3.5 period start card (PeriodStartCard) + startCycle/recomputeCycleEnds (cycles repo) + stand-in prediction src/core/simplePrediction.ts (28 days, replaced in stage 6); \"not yet\" hides until tomorrow via setting period_start_dismissed_on",
+        "P3.6 streak: calculateStreak (src/core/streak.ts), opening Today records a check-in, StreakCard real; src/db/dataVersion.ts (notifyDataChanged/useDataVersion) refreshes screens after saves"
       ],
       "next": [
-        "CHECK 3a (phone)",
-        "P3.5 did the period start card",
-        "P3.6 streak from checkins",
-        "CHECK 3b",
+        "CHECK 3a/3b (phone): check-in saving, period question (dev seed button on Today), streak",
         "P3.7 calendar grid",
         "P3.8 day details/edit past days",
         "P3.9 cycle history",
@@ -165,7 +164,9 @@
     "app/checkin.tsx": "daily check-in modal opened from Today button (route /checkin)",
     "src/core/todayCards.ts": "getTodayCards(input) -> ordered card list; decisions: pregnancy mode also hides the period-start card; no history => minimal set even if daily temperature is on",
     "src/db/saveCheckIn.ts": "saves day log + checkin atomically; empty entry records the check-in only",
-    "src/db/repos/checkins.ts": "recordCheckin, getCheckinDates"
+    "src/db/repos/checkins.ts": "recordCheckin, getCheckinDates",
+    "src/db/repos/cycles.ts": "getCycles, getLatestCycle, startCycle (closes previous), recomputeCycleEnds",
+    "src/core/streak.ts": "calculateStreak(dates, today)"
   },
   "data_model_planned": [
     "cycles",
