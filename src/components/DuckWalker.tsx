@@ -25,6 +25,9 @@ import {
 import { useDuck } from '../duck/DuckProvider';
 import { Duck } from './Duck';
 
+// Set to true to draw the walkable band, the feet dot, the picture box and a movement log.
+const DEBUG_DUCK = false;
+
 /**
  * The duck wandering around the meadow; tapping the meadow sends it there, tapping the duck
  * makes it dance. A position is the duck's feet (bottom centre of its box).
@@ -59,7 +62,7 @@ export function useDuckWalker(width: number, height: number) {
   const moveTo = useCallback(
     (target: Point) => {
       const to = clampToBounds(target, bounds);
-      if (__DEV__) {
+      if (DEBUG_DUCK) {
         setDebug(
           `tap/target ${Math.round(target.x)},${Math.round(target.y)} -> ${Math.round(to.x)},${Math.round(to.y)} | from ${Math.round(pos.current.x)},${Math.round(pos.current.y)} | wanders ${wanders.current} | reduceMotion ${reduceMotion}`,
         );
@@ -137,7 +140,7 @@ export function useDuckWalker(width: number, height: number) {
 
   const front = (
     <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, width, height }}>
-      {__DEV__ && (
+      {DEBUG_DUCK && (
         <View
           style={{
             position: 'absolute',
@@ -161,7 +164,7 @@ export function useDuckWalker(width: number, height: number) {
               top: -DUCK_H,
               width: DUCK_W,
               height: DUCK_H,
-              borderWidth: __DEV__ ? 1 : 0,
+              borderWidth: DEBUG_DUCK ? 1 : 0,
               borderColor: 'limegreen',
             },
             flipStyle,
@@ -170,7 +173,7 @@ export function useDuckWalker(width: number, height: number) {
           <Duck mode={celebrating ? 'dance' : walking ? 'walk' : 'idle'} size={DUCK_H} />
         </Animated.View>
       </Animated.View>
-      {__DEV__ && (
+      {DEBUG_DUCK && (
         <>
           <Animated.View
             style={[
