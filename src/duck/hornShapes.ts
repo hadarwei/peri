@@ -33,6 +33,8 @@ export const PERIOD_HORNS: Partial<Record<DuckFrame, string[]>> = {
 };
 
 /** Hand adjustments (picture units) where the traced horns did not sit quite on the head. */
-export const HORN_NUDGE: Partial<Record<DuckFrame, { x: number; y: number }>> = {
+export const HORN_NUDGE: Partial<Record<DuckFrame, { x: number; y: number; rotate?: number }>> = {
   dance3: { x: 0, y: 9 },
+  // dance2's head is tilted back, so the horns are turned with it (degrees, clockwise).
+  dance2: { x: 0, y: 6, rotate: 14 },
 };

@@ -113,7 +113,9 @@ function DevilHorns({ frame, head }: { frame: DuckFrame; head: Pt }) {
     if (base) shift = { x: head.x - base.head.x + nudge.x, y: head.y - base.head.y + nudge.y };
   }
   return (
-    <G transform={`translate(${shift.x} ${shift.y})`}>
+    <G
+      transform={`translate(${shift.x} ${shift.y}) rotate(${nudge.rotate ?? 0} ${head.x} ${head.y})`}
+    >
       {/* Outline first, then the red on top, so the outline only grows outward. */}
       {paths?.map((d, i) => (
         <Path
