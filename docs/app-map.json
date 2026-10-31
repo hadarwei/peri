@@ -63,7 +63,25 @@
     },
     "3": {
       "name": "daily log, calendar, history",
-      "status": "next"
+      "status": "in_progress",
+      "done": [
+        "P3.1/3.2 getTodayCards (src/core/todayCards.ts) tests first, 19 cases",
+        "P3.3 check-in modal (app/checkin.tsx): mood, same as yesterday, top-3 symptom chips (topSymptoms), collapsed more details (flow/pain/energy/note)",
+        "P3.4 saving: saveCheckIn (day log + checkins in one transaction), prefill, same-as-yesterday, duck celebrates; Today mood row saves quickly"
+      ],
+      "next": [
+        "CHECK 3a (phone)",
+        "P3.5 did the period start card",
+        "P3.6 streak from checkins",
+        "CHECK 3b",
+        "P3.7 calendar grid",
+        "P3.8 day details/edit past days",
+        "P3.9 cycle history",
+        "CHECK 3c",
+        "P3.10 add previous cycle",
+        "P3.11 edit/delete cycles",
+        "CHECK 3d + merge"
+      ]
     },
     "4": {
       "name": "temperature and reminders",
@@ -143,7 +161,11 @@
     "src/duck/anchors.ts": "measured head/back anchor per frame, REST_SCALE=0.5",
     "src/core/duckState.ts": "DUCK_STATES list/type",
     "src/components/today": "PredictionCard, MoodRow, StreakCard, DidYouKnowCard",
-    "src/content/facts.ts": "did-you-know sample; reviewed:false until a medical professional approves"
+    "src/content/facts.ts": "did-you-know sample; reviewed:false until a medical professional approves",
+    "app/checkin.tsx": "daily check-in modal opened from Today button (route /checkin)",
+    "src/core/todayCards.ts": "getTodayCards(input) -> ordered card list; decisions: pregnancy mode also hides the period-start card; no history => minimal set even if daily temperature is on",
+    "src/db/saveCheckIn.ts": "saves day log + checkin atomically; empty entry records the check-in only",
+    "src/db/repos/checkins.ts": "recordCheckin, getCheckinDates"
   },
   "data_model_planned": [
     "cycles",
@@ -170,5 +192,9 @@
     "phone check of all duck states, glows, full Today screen (merged on user request \"lets move on\")",
     "send back edited overlay PNGs if any",
     "did-you-know text is unreviewed"
+  ],
+  "decisions_to_confirm": [
+    "no history => no temperature/LH/period-start card even when user chose daily temperature (spec literal)",
+    "pregnancy mode hides period-start card too (spec only says fertility cards)"
   ]
 }
