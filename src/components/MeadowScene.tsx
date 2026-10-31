@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import type { ReactNode } from 'react';
 import { Image, Pressable, Text, View, useWindowDimensions } from 'react-native';
 
 import { t } from '../i18n';
@@ -10,10 +11,12 @@ const MEADOW_RATIO = 1385 / 780; // image height / width (assets/meadow.jpg)
 
 interface Props {
   name?: string;
+  /** Drawn over the picture, under the header text (the duck lives here). */
+  children?: ReactNode;
 }
 
 /** Header with the meadow picture (cover fit, top-aligned), greeting, privacy chip, settings. */
-export function MeadowScene({ name }: Props) {
+export function MeadowScene({ name, children }: Props) {
   const { width } = useWindowDimensions();
   const router = useRouter();
   const greeting = name ? `${t('today.greeting')}, ${name}` : t('today.greeting');
@@ -26,6 +29,7 @@ export function MeadowScene({ name }: Props) {
         style={{ position: 'absolute', top: 0, width, height: width * MEADOW_RATIO }}
         resizeMode="cover"
       />
+      {children}
       <View style={{ padding: spacing.lg, gap: spacing.sm }}>
         <View
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
