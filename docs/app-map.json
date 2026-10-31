@@ -23,7 +23,7 @@
     },
     "1": {
       "name": "skeleton and data model",
-      "status": "in_progress",
+      "status": "done",
       "done": [
         "P1.1 tabs + rtl",
         "P1.2 i18n",
@@ -36,13 +36,12 @@
         "P1.7 repos: dayLogs (patch-style upsert) + settings, tested on real SQLite",
         "P1.8 dev smoke screen on Today (awaiting phone check of persistence)"
       ],
-      "next": [
-        "CHECK 1c (user: tap button, force-close app, reopen, count persists) then merge + tag stage-1-done"
-      ]
+      "next": [],
+      "tag": "stage-1-done"
     },
     "2": {
       "name": "today screen and duck",
-      "status": "todo"
+      "status": "next"
     },
     "3": {
       "name": "daily log, calendar, history",

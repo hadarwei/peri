@@ -1,1 +1,2 @@
 - Stage 0 (setup): Expo + TS, lint/prettier, Jest, privacy guard — done 2026-10-30
+- Stage 1 (skeleton + data): 3 tabs RTL, i18n, theme/Rubik, SQLite + migrations + schema, date utils, repos, smoke screen — done 2026-10-31
