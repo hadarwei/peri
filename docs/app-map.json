@@ -29,13 +29,13 @@
         "P1.2 i18n",
         "P1.3 theme + Rubik",
         "fix: explicit rtl direction on root view (awaiting phone check)",
-        "P1.4 sqlite + migration runner"
+        "P1.4 sqlite + migration runner",
+        "P1.5 schema migration 001 (src/db/migrations/001_initial.ts)",
+        "P1.6 date utils (src/core/dates.ts) + per-timezone tests",
+        "CHECK 1b passed (typecheck, lint, tests, privacy)"
       ],
       "next": [
-        "P1.5 schema (migration 001)",
-        "P1.6 date utils",
-        "CHECK 1b",
-        "P1.7 repos",
+        "P1.7 repos (propose test approach first, wait for answer)",
         "P1.8 smoke screen",
         "CHECK 1c + merge"
       ]
@@ -104,7 +104,10 @@
     "src/core": "pure logic (dates, prediction, phase, insights, streak) - planned",
     "src/db": "getDb() opens peri.db; runMigrations(db, migrations) transactional; Db interface is fakeable in tests; migrations/ currently empty",
     "src/i18n": "typed Hebrew strings + t(key)",
-    "src/theme": "colors, spacing, radii, typography; Rubik bundled from npm (no network)"
+    "src/theme": "colors, spacing, radii, typography; Rubik bundled from npm (no network)",
+    "src/core/dates.ts": "toLocalDateString, parseLocalDate, addDays, diffInDays, startOfLocalDay; DST-safe",
+    "scripts/test-tz.js": "runs date tests under 4 time zones (npm test)",
+    "src/db/schema.test.ts": "runs real migration SQL on node:sqlite (needs Node >= 22.5, to verify on Windows)"
   },
   "data_model_planned": [
     "cycles",
