@@ -98,6 +98,30 @@ function FlowerCrown({ head }: { head: Pt }) {
   );
 }
 
+function DevilHorns({ head }: { head: Pt }) {
+  const { x, y } = head;
+  // Left horn, then the same shape mirrored around the head's centre line.
+  const horn = (side: 1 | -1) => {
+    const px = (dx: number) => x + side * dx;
+    // Thin horn: starts on the head, bends outward and ends in a sharp tip.
+    return (
+      <Path
+        d={`M${px(6)},${y + 12} C${px(5)},${y} ${px(12)},${y - 10} ${px(31)},${y - 17} C${px(26)},${y - 6} ${px(24)},${y + 4} ${px(19)},${y + 13}Z`}
+        fill="#E5383B"
+        stroke="#7A1517"
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+    );
+  };
+  return (
+    <>
+      {horn(-1)}
+      {horn(1)}
+    </>
+  );
+}
+
 function Late({ head }: { head: Pt }) {
   return (
     <>
@@ -322,6 +346,7 @@ export function FrameOverlay({ state, party, frame, boxW, boxH }: Props) {
             />
           </>
         )}
+        {state === 'period' && !showParty && <DevilHorns head={head} />}
         {state === 'pre' && <Sparkles head={head} />}
         {state === 'ovulation' && <Sparkles head={head} />}
         {state === 'pregnancy' && (
