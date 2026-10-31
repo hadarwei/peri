@@ -48,15 +48,17 @@
         "P2.3 CycleStrip + phaseForDay (static sample day 12)",
         "P2.4 Duck frame animation (opacity layers driven by a Reanimated shared value on the UI thread)",
         "P2.5 DuckWalker: wander 2.5-5.5s, 75px/s, flip, depth scale 0.85-1.12, tap meadow to walk",
-        "P2.6 celebration: DuckProvider + useDuck().celebrate() (2.8s, light haptic), tap duck, save test log triggers it"
+        "P2.6 celebration: DuckProvider + useDuck().celebrate() (2.8s, light haptic), tap duck, save test log triggers it",
+        "P2.4-2.6 duck animation, walking, celebration verified on phone (size fixed: pictures need explicit width/height; DUCK_H=100 design box, visible duck ~56x65)",
+        "debug overlays behind DEBUG_DUCK flag in DuckWalker.tsx",
+        "P2.7 CloudMessage (react-native-svg cloud, follows duck, 5s, rotating messages from he.cloud; shown on screen load via sayHello and on celebrate)"
       ],
       "next": [
-        "CHECK 2b (phone: walking, flip, wander, tap-to-walk, dance, frame rate)",
-        "P2.7 CloudMessage",
-        "P2.8 duck state overlays",
-        "P2.9",
+        "CHECK for clouds (phone)",
+        "P2.8 duck state overlays (svg)",
+        "P2.9 reduce motion (cloud already respects it)",
         "CHECK 2c",
-        "P2.10",
+        "P2.10 assemble Today",
         "CHECK 2d + merge"
       ]
     },
@@ -134,8 +136,10 @@
     "src/core/duckSequence.ts": "frame sequences + frameForProgress worklet",
     "src/core/duckMovement.ts": "pure movement rules (bounds, speed, flip, depth scale, wander delay)",
     "src/components/Duck.tsx": "stacked frame layers, opacity animated on UI thread; Reduce Motion aware",
-    "src/components/DuckWalker.tsx": "wandering + tap to walk + tap duck to dance",
-    "src/duck/DuckProvider.tsx": "context: celebrating, celebrate(); mounted in app/_layout.tsx"
+    "src/components/DuckWalker.tsx": "useDuckWalker(width,height) -> {behind: tap layer, front: duck + cloud}",
+    "src/duck/DuckProvider.tsx": "celebrating, celebrate(), message {id,text} cleared after 5s, sayHello()",
+    "src/components/CloudMessage.tsx": "cloud bubble, follows duck via shared x/y, scale+fade in, bob, fade out",
+    "src/core/pickMessage.ts": "random message index, never repeats last"
   },
   "data_model_planned": [
     "cycles",
@@ -150,5 +154,11 @@
     "repo visibility",
     "backup behavior",
     "medical content review"
+  ],
+  "lessons": [
+    "Jest cannot switch TZ: scripts/test-tz.js runs date tests per zone",
+    "Only plain numbers and worklet-marked functions on the UI thread; imported helper functions crashed Expo Go",
+    "RN Image sizes: give explicit width/height, absoluteFill ignored the box",
+    "Use pageX/pageY (not locationX/Y) for tap coordinates"
   ]
 }
