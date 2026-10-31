@@ -1,0 +1,128 @@
+{
+  "app": "peri",
+  "version": "V1 (manual)",
+  "updated": "2026-10-30",
+  "principles": [
+    "local-only data",
+    "no network calls",
+    "minimal daily input",
+    "positive feedback via duck"
+  ],
+  "stack": [
+    "Expo SDK 58",
+    "expo-router",
+    "TypeScript",
+    "expo-sqlite (planned)",
+    "Jest"
+  ],
+  "stages": {
+    "0": {
+      "name": "setup",
+      "status": "done",
+      "tag": "stage-0-done"
+    },
+    "1": {
+      "name": "skeleton and data model",
+      "status": "in_progress",
+      "done": [
+        "P1.1 tabs + rtl",
+        "P1.2 i18n",
+        "P1.3 theme + Rubik",
+        "fix: explicit rtl direction on root view (awaiting phone check)",
+        "P1.4 sqlite + migration runner",
+        "P1.5 schema migration 001 (src/db/migrations/001_initial.ts)",
+        "P1.6 date utils (src/core/dates.ts) + per-timezone tests",
+        "CHECK 1b passed (typecheck, lint, tests, privacy)",
+        "P1.7 repos: dayLogs (patch-style upsert) + settings, tested on real SQLite",
+        "P1.8 dev smoke screen on Today (awaiting phone check of persistence)"
+      ],
+      "next": [
+        "CHECK 1c (user: tap button, force-close app, reopen, count persists) then merge + tag stage-1-done"
+      ]
+    },
+    "2": {
+      "name": "today screen and duck",
+      "status": "todo"
+    },
+    "3": {
+      "name": "daily log, calendar, history",
+      "status": "todo"
+    },
+    "4": {
+      "name": "temperature and reminders",
+      "status": "todo"
+    },
+    "5": {
+      "name": "fertility test photos",
+      "status": "todo"
+    },
+    "6": {
+      "name": "prediction and insights",
+      "status": "todo"
+    },
+    "7": {
+      "name": "first run, lock, settings",
+      "status": "todo"
+    },
+    "8": {
+      "name": "polish, tests, build",
+      "status": "todo"
+    }
+  },
+  "screens": {
+    "app/(tabs)/index.tsx": {
+      "tab": "Today (היום)",
+      "status": "dev smoke screen (count of day_logs + add test log button, __DEV__ only)",
+      "planned": [
+        "duck",
+        "today cards",
+        "streak",
+        "did-you-know",
+        "insights incl. locked"
+      ]
+    },
+    "app/(tabs)/calendar.tsx": {
+      "tab": "Calendar (יומן)",
+      "status": "placeholder",
+      "planned": [
+        "month view",
+        "history of past cycles"
+      ]
+    },
+    "app/(tabs)/me.tsx": {
+      "tab": "Me (אני)",
+      "status": "placeholder",
+      "planned": [
+        "settings",
+        "education library",
+        "export/lock"
+      ]
+    }
+  },
+  "modules": {
+    "src/rtl.ts": "forceRTL (not reliable in Expo Go); app/_layout.tsx sets direction rtl explicitly",
+    "src/core": "pure logic (dates, prediction, phase, insights, streak) - planned",
+    "src/db": "getDb() opens peri.db; runMigrations(db, migrations) transactional; Db interface is fakeable in tests; migrations/ currently empty",
+    "src/i18n": "typed Hebrew strings + t(key)",
+    "src/theme": "colors, spacing, radii, typography; Rubik bundled from npm (no network)",
+    "src/core/dates.ts": "toLocalDateString, parseLocalDate, addDays, diffInDays, startOfLocalDay; DST-safe",
+    "scripts/test-tz.js": "runs date tests under 4 time zones (npm test)",
+    "src/db/schema.test.ts": "runs real migration SQL on node:sqlite (needs Node >= 22.5, to verify on Windows)",
+    "src/db/repos": "dayLogs.ts (get/range/count/upsert patch), settings.ts (get/set)",
+    "src/db/testing/nodeSqliteDb.ts": "TEST ONLY Db adapter over node:sqlite"
+  },
+  "data_model_planned": [
+    "cycles",
+    "day_logs",
+    "temperature_readings",
+    "test_photos",
+    "settings",
+    "checkins"
+  ],
+  "open_questions": [
+    "RTL restart behavior in Expo Go",
+    "repo visibility",
+    "backup behavior",
+    "medical content review"
+  ]
+}
