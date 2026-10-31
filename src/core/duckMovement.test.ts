@@ -5,6 +5,7 @@ import {
   nextWanderDelayMs,
   randomPoint,
   walkDurationMs,
+  walkableBounds,
   type Bounds,
 } from './duckMovement';
 
@@ -44,5 +45,9 @@ describe('duck movement', () => {
   it('wander delay is between 2.5 and 5.5 seconds', () => {
     expect(nextWanderDelayMs(() => 0)).toBe(2500);
     expect(nextWanderDelayMs(() => 1)).toBe(5500);
+  });
+
+  it('keeps the feet in the lower meadow band, 55 px from each side', () => {
+    expect(walkableBounds(390)).toEqual({ minX: 55, maxX: 335, minY: 215, maxY: 298 });
   });
 });

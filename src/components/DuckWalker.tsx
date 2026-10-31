@@ -8,16 +8,17 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
 
 import {
+  DUCK_H,
+  DUCK_W,
   clampToBounds,
   depthScale,
   facingScaleX,
   nextWanderDelayMs,
   randomPoint,
   walkDurationMs,
-  type Bounds,
+  walkableBounds,
   type Point,
 } from '../core/duckMovement';
 import { useDuck } from '../duck/DuckProvider';
@@ -26,25 +27,18 @@ import { Duck } from './Duck';
 interface Props {
   width: number;
   height: number;
-  /** Top of the walkable band: keeps the duck clear of the greeting and chip. */
-  topInset: number;
-  duckSize?: number;
 }
 
-/** The duck wandering around the scene; tapping the meadow sends it there. */
-export function DuckWalker({ width, height, topInset, duckSize = 90 }: Props) {
+/**
+ * The duck wandering around the meadow; tapping the meadow sends it there.
+ * A position is the duck's feet (bottom centre of its box), matching the design.
+ */
+export function DuckWalker({ width, height }: Props) {
   const reduceMotion = useReducedMotion();
   const { celebrating, celebrate } = useDuck();
-  const duckWidth = (duckSize * 260) / 250;
-  const bounds = useMemo<Bounds>(
-    () => ({ minX: 0, maxX: width - duckWidth, minY: topInset, maxY: height - duckSize - 8 }),
-    [width, height, topInset, duckSize, duckWidth],
-  );
+  const bounds = useMemo(() => walkableBounds(width), [width]);
 
-  const [start] = useState<Point>(() => ({
-    x: (bounds.minX + bounds.maxX) / 2,
-    y: (bounds.minY + bounds.maxY) / 2,
-  }));
+  const [start] = useState<Point>(() => ({ x: width / 2, y: 256 }));
   const x = useSharedValue(start.x);
   const y = useSharedValue(start.y);
   const facing = useSharedValue<1 | -1>(1);
@@ -52,13 +46,12 @@ export function DuckWalker({ width, height, topInset, duckSize = 90 }: Props) {
 
   const pos = useRef<Point>(start); // where the duck is (or is heading), for the JS side
   const face = useRef<1 | -1>(1);
+  const wanderTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const celebratingRef = useRef(celebrating);
   useEffect(() => {
     celebratingRef.current = celebrating;
   }, [celebrating]);
-  const wanderTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const stopped = useCallback(() => setWalking(false), []);
 
   const moveTo = useCallback(
     (target: Point) => {
@@ -77,17 +70,16 @@ export function DuckWalker({ width, height, topInset, duckSize = 90 }: Props) {
       setWalking(true);
       cancelAnimation(x);
       cancelAnimation(y);
+      x.set(withTiming(to.x, { duration, easing: Easing.linear }));
       y.set(withTiming(to.y, { duration, easing: Easing.linear }));
-      x.set(
-        withTiming(to.x, { duration, easing: Easing.linear }, (finished) => {
-          if (finished) scheduleOnRN(stopped);
-        }),
-      );
+      // Stop the legs when the walk ends. A plain JS timer, so no code runs on the UI thread.
+      if (stopTimer.current) clearTimeout(stopTimer.current);
+      stopTimer.current = setTimeout(() => setWalking(false), duration);
     },
-    [bounds, reduceMotion, x, y, facing, stopped],
+    [bounds, reduceMotion, x, y, facing],
   );
 
-  // Wander to a new random point every 2.5 to 5.5 seconds.
+  // Wander to a new random point every 2.5 to 5.5 seconds (not while dancing).
   useEffect(() => {
     if (reduceMotion) return;
     const schedule = () => {
@@ -99,13 +91,15 @@ export function DuckWalker({ width, height, topInset, duckSize = 90 }: Props) {
     schedule();
     return () => {
       if (wanderTimer.current) clearTimeout(wanderTimer.current);
+      if (stopTimer.current) clearTimeout(stopTimer.current);
     };
   }, [reduceMotion, moveTo, bounds]);
 
   const duckStyle = useAnimatedStyle(() => ({
+    transformOrigin: '50% 100%',
     transform: [
-      { translateX: x.get() },
-      { translateY: y.get() },
+      { translateX: x.get() - DUCK_W / 2 },
+      { translateY: y.get() - DUCK_H },
       { scale: depthScale(y.get(), bounds) },
       { scaleX: facing.get() },
     ],
@@ -114,16 +108,16 @@ export function DuckWalker({ width, height, topInset, duckSize = 90 }: Props) {
   return (
     <Pressable
       style={{ position: 'absolute', top: 0, left: 0, width, height }}
-      onPress={(e) =>
-        moveTo({
-          x: e.nativeEvent.locationX - duckWidth / 2,
-          y: e.nativeEvent.locationY - duckSize / 2,
-        })
-      }
+      onPress={(e) => moveTo({ x: e.nativeEvent.locationX, y: e.nativeEvent.locationY })}
     >
-      <Animated.View style={[{ position: 'absolute', top: 0, left: 0 }, duckStyle]}>
+      <Animated.View
+        style={[
+          { position: 'absolute', top: 0, left: 0, width: DUCK_W, height: DUCK_H },
+          duckStyle,
+        ]}
+      >
         <Pressable onPress={celebrate} accessibilityRole="button" hitSlop={8}>
-          <Duck mode={celebrating ? 'dance' : walking ? 'walk' : 'idle'} size={duckSize} />
+          <Duck mode={celebrating ? 'dance' : walking ? 'walk' : 'idle'} size={DUCK_H} />
         </Pressable>
       </Animated.View>
     </Pressable>

@@ -1,4 +1,5 @@
-// Pure movement rules for the duck. Positions are the top-left of the duck's box inside the scene.
+// Pure movement rules for the duck. A position is where the duck's FEET are (bottom centre of its
+// box) inside the 310 px high meadow, as in the design: box 104x100, feet band y 215-298.
 
 export interface Point {
   x: number;
@@ -12,6 +13,11 @@ export interface Bounds {
   maxY: number;
 }
 
+export const DUCK_W = 104;
+export const DUCK_H = 100;
+export const FEET_MIN_Y = 215;
+export const FEET_MAX_Y = 298;
+export const EDGE_MARGIN = 55;
 export const SPEED_PX_PER_S = 75;
 export const MIN_SCALE = 0.85;
 export const MAX_SCALE = 1.12;
@@ -55,4 +61,14 @@ export function depthScale(y: number, b: Bounds): number {
 /** Pause before the next wander, 2.5 to 5.5 seconds. */
 export function nextWanderDelayMs(rng: () => number = Math.random): number {
   return WANDER_MIN_MS + rng() * (WANDER_MAX_MS - WANDER_MIN_MS);
+}
+
+/** Where the duck's feet may be for a scene of the given width (the lower part of the meadow). */
+export function walkableBounds(sceneWidth: number): Bounds {
+  return {
+    minX: EDGE_MARGIN,
+    maxX: sceneWidth - EDGE_MARGIN,
+    minY: FEET_MIN_Y,
+    maxY: FEET_MAX_Y,
+  };
 }

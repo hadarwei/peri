@@ -57,7 +57,7 @@ export default function TodayScreen() {
       contentContainerStyle={{ paddingBottom: 32 }}
     >
       <MeadowScene>
-        <DuckWalker width={width} height={MEADOW_HEIGHT} topInset={130} />
+        <DuckWalker width={width} height={MEADOW_HEIGHT} />
       </MeadowScene>
       <View style={{ padding: 16, gap: 16 }}>
         {/* Static sample data until stage 6 computes the real cycle day. */}
