@@ -2,6 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { CycleStrip } from '../../src/components/CycleStrip';
 import { MeadowScene } from '../../src/components/MeadowScene';
 import { toLocalDateString } from '../../src/core/dates';
 import { getDb } from '../../src/db';
@@ -52,6 +53,8 @@ export default function TodayScreen() {
     >
       <MeadowScene />
       <View style={{ padding: 16, gap: 16 }}>
+        {/* Static sample data until stage 6 computes the real cycle day. */}
+        <CycleStrip dayOfCycle={12} />
         {/* Dev-only smoke test of persistence (removed in a later stage). */}
         {__DEV__ && (
           <View style={{ alignItems: 'center', gap: 12 }}>
