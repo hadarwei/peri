@@ -1,3 +1,5 @@
+import { diffInDays, parseLocalDate } from './dates';
+
 /**
  * Which cards the daily check-in shows today. A pure function: everything it needs comes in as
  * plain data, so every rule can be unit-tested without a phone or a database.
@@ -34,6 +36,40 @@ export interface TodayCardsInput {
   pregnancyMode: boolean;
 }
 
-export function getTodayCards(_input: TodayCardsInput): TodayCard[] {
-  return []; // implemented in the next commit
+const WINDOW_AROUND_PREDICTION_DAYS = 2;
+
+export function getTodayCards(input: TodayCardsInput): TodayCard[] {
+  const alwaysOn: TodayCard[] = ['mood', 'sameAsYesterday', 'symptoms'];
+  const more: TodayCard = 'moreDetails';
+
+  // Without history there are no predictions: only the minimal set.
+  if (!input.hasHistory) return [...alwaysOn, more];
+
+  const cards: TodayCard[] = [];
+
+  // "Did the period start?" from 2 days before the prediction onwards, until it is marked.
+  // Being late is the same rule: the card keeps coming back each day (no notifications).
+  if (!input.pregnancyMode && input.predictedPeriodStart && !input.periodStartMarked) {
+    const daysUntil = diffInDays(
+      parseLocalDate(input.predictedPeriodStart),
+      parseLocalDate(input.today),
+    );
+    if (daysUntil <= WINDOW_AROUND_PREDICTION_DAYS) cards.push('periodStart');
+  }
+
+  cards.push(...alwaysOn);
+
+  if (!input.pregnancyMode) {
+    const inFertileWindow =
+      input.fertileWindow !== null &&
+      input.today >= input.fertileWindow.start &&
+      input.today <= input.fertileWindow.end; // 'YYYY-MM-DD' strings compare correctly as text
+    if (input.temperatureEnabled && (inFertileWindow || input.temperatureDaily)) {
+      cards.push('temperature');
+    }
+    if (input.testsEnabled && inFertileWindow) cards.push('lhTest');
+  }
+
+  cards.push(more);
+  return cards;
 }
