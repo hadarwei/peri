@@ -14,8 +14,8 @@ import {
   DUCK_W,
   clampToBounds,
   depthScale,
-  isOnDuck,
   facingScaleX,
+  isOnDuck,
   nextWanderDelayMs,
   randomPoint,
   walkDurationMs,
@@ -25,21 +25,20 @@ import {
 import { useDuck } from '../duck/DuckProvider';
 import { Duck } from './Duck';
 
-interface Props {
-  width: number;
-  height: number;
-}
-
 /**
- * The duck wandering around the meadow; tapping the meadow sends it there.
- * A position is the duck's feet (bottom centre of its box), matching the design.
+ * The duck wandering around the meadow; tapping the meadow sends it there, tapping the duck
+ * makes it dance. A position is the duck's feet (bottom centre of its box).
+ *
+ * Returns two layers for <MeadowScene>: `behind` catches taps (under the header buttons) and
+ * `front` draws the duck on top of everything without taking touches, so it can walk over the
+ * greeting text and the header buttons stay tappable.
  */
-export function DuckWalker({ width, height }: Props) {
+export function useDuckWalker(width: number, height: number) {
   const reduceMotion = useReducedMotion();
   const { celebrating, celebrate } = useDuck();
   const bounds = useMemo(() => walkableBounds(width), [width]);
 
-  const [start] = useState<Point>(() => ({ x: width / 2, y: 256 }));
+  const [start] = useState<Point>(() => ({ x: width / 2, y: 240 }));
   const x = useSharedValue(start.x);
   const y = useSharedValue(start.y);
   const facing = useSharedValue<1 | -1>(1);
@@ -105,9 +104,9 @@ export function DuckWalker({ width, height }: Props) {
     };
   }, [reduceMotion, moveTo, bounds]);
 
-  // One animated "anchor" sits exactly on the duck's feet (same kind of style as the red dot,
-  // which tracks correctly). It has no size, so scaling it scales about the feet. The duck box
-  // hangs from the anchor with static offsets. Only plain numbers are used on the UI thread.
+  // One animated "anchor" sits exactly on the duck's feet. It has no size, so scaling it scales
+  // about the feet. The duck box hangs from it with static offsets. Plain numbers only on the UI
+  // thread (no imported functions).
   const { minY, maxY } = bounds;
   const anchorStyle = useAnimatedStyle(() => {
     const t = Math.min(Math.max((y.get() - minY) / (maxY - minY), 0), 1);
@@ -116,42 +115,64 @@ export function DuckWalker({ width, height }: Props) {
     };
   });
   const flipStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: facing.get() }] }));
-
   const feetDotStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: x.get() }, { translateY: y.get() }],
   }));
 
-  return (
+  const behind = (
     <Pressable
-      style={{ position: 'absolute', top: 0, left: 0, width, height }}
       ref={sceneRef}
+      style={{ position: 'absolute', top: 0, left: 0, width, height }}
       onPress={(e) => {
         // pageX/pageY are screen coordinates; locationX/Y depend on which child got the touch.
         const { pageX, pageY } = e.nativeEvent;
         sceneRef.current?.measureInWindow((ox, oy) => {
           const tap = { x: pageX - ox, y: pageY - oy };
-          // The duck hangs from a size-less anchor, so it cannot receive touches itself.
           if (isOnDuck(tap, pos.current, depthScale(pos.current.y, bounds))) celebrate();
           else moveTo(tap);
         });
       }}
-    >
+    />
+  );
+
+  const front = (
+    <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, width, height }}>
+      {__DEV__ && (
+        <View
+          style={{
+            position: 'absolute',
+            left: bounds.minX,
+            top: bounds.minY,
+            width: bounds.maxX - bounds.minX,
+            height: bounds.maxY - bounds.minY,
+            borderWidth: 1,
+            borderColor: 'red',
+          }}
+        />
+      )}
+      <Animated.View
+        style={[{ position: 'absolute', left: 0, top: 0, width: 0, height: 0 }, anchorStyle]}
+      >
+        <Animated.View
+          style={[
+            {
+              position: 'absolute',
+              left: -DUCK_W / 2,
+              top: -DUCK_H,
+              width: DUCK_W,
+              height: DUCK_H,
+              borderWidth: __DEV__ ? 1 : 0,
+              borderColor: 'limegreen',
+            },
+            flipStyle,
+          ]}
+        >
+          <Duck mode={celebrating ? 'dance' : walking ? 'walk' : 'idle'} size={DUCK_H} />
+        </Animated.View>
+      </Animated.View>
       {__DEV__ && (
         <>
-          <View
-            pointerEvents="none"
-            style={{
-              position: 'absolute',
-              left: bounds.minX,
-              top: bounds.minY,
-              width: bounds.maxX - bounds.minX,
-              height: bounds.maxY - bounds.minY,
-              borderWidth: 1,
-              borderColor: 'red',
-            }}
-          />
           <Animated.View
-            pointerEvents="none"
             style={[
               {
                 position: 'absolute',
@@ -165,41 +186,22 @@ export function DuckWalker({ width, height }: Props) {
               feetDotStyle,
             ]}
           />
+          <Text
+            style={{
+              position: 'absolute',
+              bottom: 2,
+              left: 4,
+              right: 4,
+              fontSize: 9,
+              color: '#1F3347',
+            }}
+          >
+            {debug}
+          </Text>
         </>
       )}
-      <Animated.View
-        pointerEvents="none"
-        style={[{ position: 'absolute', left: 0, top: 0, width: 0, height: 0 }, anchorStyle]}
-      >
-        <Animated.View
-          style={[
-            {
-              position: 'absolute',
-              left: -DUCK_W / 2,
-              top: -DUCK_H,
-              width: DUCK_W,
-              height: DUCK_H,
-            },
-            flipStyle,
-          ]}
-        >
-          <Duck mode={celebrating ? 'dance' : walking ? 'walk' : 'idle'} size={DUCK_H} />
-        </Animated.View>
-      </Animated.View>
-      {__DEV__ && (
-        <Text
-          style={{
-            position: 'absolute',
-            bottom: 2,
-            left: 4,
-            right: 4,
-            fontSize: 9,
-            color: '#1F3347',
-          }}
-        >
-          {debug}
-        </Text>
-      )}
-    </Pressable>
+    </View>
   );
+
+  return { behind, front };
 }

@@ -4,7 +4,7 @@ import { Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-na
 
 import { CycleStrip } from '../../src/components/CycleStrip';
 import { useDuck } from '../../src/duck/DuckProvider';
-import { DuckWalker } from '../../src/components/DuckWalker';
+import { useDuckWalker } from '../../src/components/DuckWalker';
 import { MEADOW_HEIGHT, MeadowScene } from '../../src/components/MeadowScene';
 import { toLocalDateString } from '../../src/core/dates';
 import { getDb } from '../../src/db';
@@ -15,6 +15,7 @@ import { colors, MIN_TOUCH, radii, type } from '../../src/theme';
 export default function TodayScreen() {
   const { width } = useWindowDimensions();
   const { celebrate } = useDuck();
+  const duckLayers = useDuckWalker(width, MEADOW_HEIGHT);
   const [count, setCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
@@ -56,9 +57,7 @@ export default function TodayScreen() {
       style={{ flex: 1, backgroundColor: colors.ground }}
       contentContainerStyle={{ paddingBottom: 32 }}
     >
-      <MeadowScene>
-        <DuckWalker width={width} height={MEADOW_HEIGHT} />
-      </MeadowScene>
+      <MeadowScene behind={duckLayers.behind} front={duckLayers.front} />
       <View style={{ padding: 16, gap: 16 }}>
         {/* Static sample data until stage 6 computes the real cycle day. */}
         <CycleStrip dayOfCycle={12} />

@@ -11,12 +11,14 @@ const MEADOW_RATIO = 1385 / 780; // image height / width (assets/meadow.jpg)
 
 interface Props {
   name?: string;
-  /** Drawn over the picture, under the header text (the duck lives here). */
-  children?: ReactNode;
+  /** Over the picture, UNDER the header (taps on the meadow are caught here). */
+  behind?: ReactNode;
+  /** Over everything, not touchable (the duck is drawn here so it can cross the header text). */
+  front?: ReactNode;
 }
 
 /** Header with the meadow picture (cover fit, top-aligned), greeting, privacy chip, settings. */
-export function MeadowScene({ name, children }: Props) {
+export function MeadowScene({ name, behind, front }: Props) {
   const { width } = useWindowDimensions();
   const router = useRouter();
   const greeting = name ? `${t('today.greeting')}, ${name}` : t('today.greeting');
@@ -31,7 +33,7 @@ export function MeadowScene({ name, children }: Props) {
         style={{ position: 'absolute', top: 0, width, height: width * MEADOW_RATIO }}
         resizeMode="cover"
       />
-      {children}
+      {behind}
       <View pointerEvents="box-none" style={{ padding: spacing.lg, gap: spacing.sm }}>
         <View
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
@@ -69,6 +71,7 @@ export function MeadowScene({ name, children }: Props) {
           <Text style={[type.caption, { color: colors.muted }]}>{t('today.privacyChip')}</Text>
         </View>
       </View>
+      {front}
     </View>
   );
 }
