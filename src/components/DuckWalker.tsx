@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, Text } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import Animated, {
   Easing,
   cancelAnimation,
@@ -43,6 +43,7 @@ export function DuckWalker({ width, height }: Props) {
   const y = useSharedValue(start.y);
   const facing = useSharedValue<1 | -1>(1);
   const [walking, setWalking] = useState(false);
+  const sceneRef = useRef<ComponentRef<typeof Pressable>>(null);
   const [debug, setDebug] = useState('');
   const wanders = useRef(0);
 
@@ -113,11 +114,53 @@ export function DuckWalker({ width, height }: Props) {
     ],
   }));
 
+  const feetDotStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: x.get() }, { translateY: y.get() }],
+  }));
+
   return (
     <Pressable
       style={{ position: 'absolute', top: 0, left: 0, width, height }}
-      onPress={(e) => moveTo({ x: e.nativeEvent.locationX, y: e.nativeEvent.locationY })}
+      ref={sceneRef}
+      onPress={(e) => {
+        // pageX/pageY are screen coordinates; locationX/Y depend on which child got the touch.
+        const { pageX, pageY } = e.nativeEvent;
+        sceneRef.current?.measureInWindow((ox, oy) => {
+          moveTo({ x: pageX - ox, y: pageY - oy });
+        });
+      }}
     >
+      {__DEV__ && (
+        <>
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              left: bounds.minX,
+              top: bounds.minY,
+              width: bounds.maxX - bounds.minX,
+              height: bounds.maxY - bounds.minY,
+              borderWidth: 1,
+              borderColor: 'red',
+            }}
+          />
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              {
+                position: 'absolute',
+                top: -4,
+                left: -4,
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: 'red',
+              },
+              feetDotStyle,
+            ]}
+          />
+        </>
+      )}
       <Animated.View
         style={[
           { position: 'absolute', top: 0, left: 0, width: DUCK_W, height: DUCK_H },
