@@ -41,7 +41,25 @@
     },
     "2": {
       "name": "today screen and duck",
-      "status": "next"
+      "status": "in_progress",
+      "done": [
+        "P2.1 duck frames registered (src/assets/duckFrames.ts), static frame shown on Today"
+      ],
+      "next": [
+        "P2.2 MeadowScene",
+        "P2.3 CycleStrip",
+        "CHECK 2a",
+        "P2.4 Duck walk cycle",
+        "P2.5 movement",
+        "P2.6 celebration + haptic",
+        "CHECK 2b",
+        "P2.7 CloudMessage",
+        "P2.8 duck state overlays",
+        "P2.9",
+        "CHECK 2c",
+        "P2.10",
+        "CHECK 2d + merge"
+      ]
     },
     "3": {
       "name": "daily log, calendar, history",
@@ -108,7 +126,9 @@
     "scripts/test-tz.js": "runs date tests under 4 time zones (npm test)",
     "src/db/schema.test.ts": "runs real migration SQL on node:sqlite (needs Node >= 22.5, to verify on Windows)",
     "src/db/repos": "dayLogs.ts (get/range/count/upsert patch), settings.ts (get/set)",
-    "src/db/testing/nodeSqliteDb.ts": "TEST ONLY Db adapter over node:sqlite"
+    "src/db/testing/nodeSqliteDb.ts": "TEST ONLY Db adapter over node:sqlite",
+    "assets/duck": "9 frames; sizes differ (stand/walk/dance 260x250, happy 183x111, rest 491x249) - Duck component must size per frame",
+    "assets/meadow.jpg": "780x1385 portrait; used as 390x310 cover header"
   },
   "data_model_planned": [
     "cycles",
