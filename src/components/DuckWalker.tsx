@@ -23,6 +23,7 @@ import {
   type Point,
 } from '../core/duckMovement';
 import { useDuck } from '../duck/DuckProvider';
+import { CloudMessage } from './CloudMessage';
 import { Duck } from './Duck';
 
 // Set to true to draw the walkable band, the feet dot, the picture box and a movement log.
@@ -38,7 +39,7 @@ const DEBUG_DUCK = false;
  */
 export function useDuckWalker(width: number, height: number) {
   const reduceMotion = useReducedMotion();
-  const { celebrating, celebrate } = useDuck();
+  const { celebrating, celebrate, message } = useDuck();
   const bounds = useMemo(() => walkableBounds(width), [width]);
 
   const [start] = useState<Point>(() => ({ x: width / 2, y: 240 }));
@@ -173,6 +174,7 @@ export function useDuckWalker(width: number, height: number) {
           <Duck mode={celebrating ? 'dance' : walking ? 'walk' : 'idle'} size={DUCK_H} />
         </Animated.View>
       </Animated.View>
+      <CloudMessage message={message} x={x} y={y} sceneWidth={width} sceneHeight={height} />
       {DEBUG_DUCK && (
         <>
           <Animated.View

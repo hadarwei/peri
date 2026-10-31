@@ -1,5 +1,5 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 
 import { CycleStrip } from '../../src/components/CycleStrip';
@@ -14,11 +14,17 @@ import { colors, MIN_TOUCH, radii, type } from '../../src/theme';
 
 export default function TodayScreen() {
   const { width } = useWindowDimensions();
-  const { celebrate } = useDuck();
+  const { celebrate, sayHello } = useDuck();
   const duckLayers = useDuckWalker(width, MEADOW_HEIGHT);
   const [count, setCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+
+  // A friendly cloud when the screen opens (after a short pause so the screen settles first).
+  useEffect(() => {
+    const timer = setTimeout(sayHello, 600);
+    return () => clearTimeout(timer);
+  }, [sayHello]);
 
   // Re-count every time this tab comes into focus (and on first open).
   useFocusEffect(
