@@ -22,6 +22,7 @@ export const he = {
     open: 'לרישום היומי',
     done: 'סיימתי',
     skipToday: 'לדלג להיום',
+    saveFailed: 'לא הצלחנו לשמור. אפשר לנסות שוב.',
     sameAsYesterday: 'כמו אתמול',
     symptoms: 'תסמינים',
     moreDetails: 'פרטים נוספים',

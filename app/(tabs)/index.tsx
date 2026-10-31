@@ -15,6 +15,7 @@ import { MEADOW_HEIGHT, MeadowScene } from '../../src/components/MeadowScene';
 import { DUCK_STATES, type DuckState } from '../../src/core/duckState';
 import { toLocalDateString } from '../../src/core/dates';
 import { getDb } from '../../src/db';
+import { saveCheckIn } from '../../src/db/saveCheckIn';
 import { countDayLogs, upsertDayLog } from '../../src/db/repos';
 import { colors, MIN_TOUCH, radii, type } from '../../src/theme';
 
@@ -51,6 +52,16 @@ export default function TodayScreen() {
       };
     }, []),
   );
+
+  const quickMood = async (mood: number) => {
+    try {
+      await saveCheckIn(await getDb(), toLocalDateString(new Date()), { mood }, true);
+      setCount(await countDayLogs(await getDb()));
+    } catch (e) {
+      setError(String(e));
+    }
+    celebrate();
+  };
 
   const addTestLog = async () => {
     try {
@@ -104,8 +115,8 @@ export default function TodayScreen() {
             accent={colors.fertile}
           />
         </View>
-        {/* Tapping a face only celebrates for now; saving the mood arrives in stage 3. */}
-        <MoodRow onPick={celebrate} />
+        {/* A tap on a face saves today's mood (and counts as a check-in) and the duck celebrates. */}
+        <MoodRow onPick={quickMood} />
         <StreakCard days={5} />
         <DidYouKnowCard fact={FACTS[0]} />
         {/* Dev-only picker for the duck's look (the real state comes from the cycle in stage 6). */}

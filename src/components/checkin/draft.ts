@@ -26,3 +26,40 @@ export function toggleSymptom(symptoms: string[], symptom: string): string[] {
     ? symptoms.filter((s) => s !== symptom)
     : [...symptoms, symptom];
 }
+
+interface LogLike {
+  mood: number | null;
+  symptoms: string[];
+  flow: number | null;
+  pain: number | null;
+  energy: number | null;
+  note: string;
+}
+
+/** A draft that starts from an already saved day log. */
+export function draftFromLog(log: LogLike): CheckInDraft {
+  return {
+    mood: log.mood,
+    symptoms: [...log.symptoms],
+    flow: log.flow,
+    pain: log.pain,
+    energy: log.energy,
+    note: log.note,
+  };
+}
+
+/** "Same as yesterday": copies how yesterday felt, but not the free-text note. */
+export function draftFromYesterday(yesterday: LogLike): CheckInDraft {
+  return { ...draftFromLog(yesterday), note: '' };
+}
+
+export function isDraftEmpty(d: CheckInDraft): boolean {
+  return (
+    d.mood === null &&
+    d.symptoms.length === 0 &&
+    d.flow === null &&
+    d.pain === null &&
+    d.energy === null &&
+    d.note.trim() === ''
+  );
+}
