@@ -45,14 +45,13 @@
       "done": [
         "P2.1 duck frames registered (src/assets/duckFrames.ts), static frame shown on Today",
         "P2.2 MeadowScene (src/components/MeadowScene.tsx)",
-        "P2.3 CycleStrip + phaseForDay (static sample day 12)"
+        "P2.3 CycleStrip + phaseForDay (static sample day 12)",
+        "P2.4 Duck frame animation (opacity layers driven by a Reanimated shared value on the UI thread)",
+        "P2.5 DuckWalker: wander 2.5-5.5s, 75px/s, flip, depth scale 0.85-1.12, tap meadow to walk",
+        "P2.6 celebration: DuckProvider + useDuck().celebrate() (2.8s, light haptic), tap duck, save test log triggers it"
       ],
       "next": [
-        "CHECK 2a (phone: compare Today screen to spec)",
-        "P2.4 Duck walk cycle",
-        "P2.5 movement",
-        "P2.6 celebration + haptic",
-        "CHECK 2b",
+        "CHECK 2b (phone: walking, flip, wander, tap-to-walk, dance, frame rate)",
         "P2.7 CloudMessage",
         "P2.8 duck state overlays",
         "P2.9",
@@ -131,7 +130,12 @@
     "assets/meadow.jpg": "780x1385 portrait; used as 390x310 cover header",
     "src/components": "MeadowScene (header, greeting, privacy chip, settings->Me), CycleStrip (28 phase segments + duck marker)",
     "src/core/phase.ts": "phaseForDay(day) display phases for sample 28-day cycle (placeholder until stage 6)",
-    "src/i18n/index.ts": "t(key) and tf(key, values) for {placeholders}"
+    "src/i18n/index.ts": "t(key) and tf(key, values) for {placeholders}",
+    "src/core/duckSequence.ts": "frame sequences + frameForProgress worklet",
+    "src/core/duckMovement.ts": "pure movement rules (bounds, speed, flip, depth scale, wander delay)",
+    "src/components/Duck.tsx": "stacked frame layers, opacity animated on UI thread; Reduce Motion aware",
+    "src/components/DuckWalker.tsx": "wandering + tap to walk + tap duck to dance",
+    "src/duck/DuckProvider.tsx": "context: celebrating, celebrate(); mounted in app/_layout.tsx"
   },
   "data_model_planned": [
     "cycles",
