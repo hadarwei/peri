@@ -53,6 +53,7 @@ export function facingScaleX(from: Point, to: Point, current: 1 | -1): 1 | -1 {
 
 /** Perspective: the lower on screen, the closer and bigger (0.85 at the top, 1.12 at the bottom). */
 export function depthScale(y: number, b: Bounds): number {
+  'worklet'; // called from an animated style, i.e. on the UI thread
   if (b.maxY === b.minY) return 1;
   const t = Math.min(Math.max((y - b.minY) / (b.maxY - b.minY), 0), 1);
   return MIN_SCALE + t * (MAX_SCALE - MIN_SCALE);
