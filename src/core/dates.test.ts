@@ -35,11 +35,12 @@ describe('toLocalDateString / parseLocalDate', () => {
 
 describe('time zone change', () => {
   it('the same instant is a different local date in different zones', () => {
-    const instant = new Date('2026-01-01T23:30:00Z');
+    const iso = '2026-01-01T23:30:00Z';
     setTz('Asia/Jerusalem');
-    expect(toLocalDateString(instant)).toBe('2026-01-02');
+    expect(toLocalDateString(new Date(iso))).toBe('2026-01-02');
     setTz('America/New_York');
-    expect(toLocalDateString(instant)).toBe('2026-01-01');
+    // Fresh Date: V8 caches local-time fields on a Date object, so an old one would be stale.
+    expect(toLocalDateString(new Date(iso))).toBe('2026-01-01');
   });
 
   it('a stored date string keeps its meaning after the zone changes (traveling)', () => {
