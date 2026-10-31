@@ -9,6 +9,7 @@ export const he = {
     logCount: 'מספר רישומים שנשמרו',
     addTestLog: 'הוסף רישום בדיקה',
     loading: 'טוען…',
+    saved: 'נשמר',
     dbError: 'שגיאת מסד נתונים',
   },
 } as const;
