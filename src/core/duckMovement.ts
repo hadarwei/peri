@@ -17,8 +17,8 @@ export interface Bounds {
 export const DUCK_H = 80;
 export const DUCK_W = (DUCK_H * 260) / 250; // frames are 260x250
 // Feet band: head stays below the greeting and chip (which end about 95 px from the top).
-export const FEET_MIN_Y = 170;
-export const FEET_MAX_Y = 300;
+export const FEET_MIN_Y = 150;
+export const FEET_MAX_Y = 285;
 export const EDGE_MARGIN = 40;
 export const SPEED_PX_PER_S = 75;
 export const MIN_SCALE = 0.85;
@@ -74,4 +74,11 @@ export function walkableBounds(sceneWidth: number): Bounds {
     minY: FEET_MIN_Y,
     maxY: FEET_MAX_Y,
   };
+}
+
+/** True if a tap (scene coordinates) lands on the duck drawn with its feet at `feet`. */
+export function isOnDuck(tap: Point, feet: Point, scale: number): boolean {
+  const halfW = (DUCK_W * scale) / 2;
+  const h = DUCK_H * scale;
+  return Math.abs(tap.x - feet.x) <= halfW && tap.y <= feet.y && tap.y >= feet.y - h;
 }

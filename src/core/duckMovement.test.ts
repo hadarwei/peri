@@ -2,6 +2,7 @@ import {
   clampToBounds,
   depthScale,
   facingScaleX,
+  isOnDuck,
   nextWanderDelayMs,
   randomPoint,
   walkDurationMs,
@@ -48,6 +49,14 @@ describe('duck movement', () => {
   });
 
   it('keeps the feet inside the meadow, 40 px from each side', () => {
-    expect(walkableBounds(390)).toEqual({ minX: 40, maxX: 350, minY: 170, maxY: 300 });
+    expect(walkableBounds(390)).toEqual({ minX: 40, maxX: 350, minY: 150, maxY: 285 });
+  });
+
+  it('hit-tests the duck box above its feet', () => {
+    const feet = { x: 100, y: 200 };
+    expect(isOnDuck({ x: 100, y: 160 }, feet, 1)).toBe(true); // on the body
+    expect(isOnDuck({ x: 100, y: 210 }, feet, 1)).toBe(false); // below the feet
+    expect(isOnDuck({ x: 100, y: 100 }, feet, 1)).toBe(false); // far above the head
+    expect(isOnDuck({ x: 160, y: 160 }, feet, 1)).toBe(false); // too far to the side
   });
 });

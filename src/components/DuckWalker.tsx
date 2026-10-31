@@ -14,6 +14,7 @@ import {
   DUCK_W,
   clampToBounds,
   depthScale,
+  isOnDuck,
   facingScaleX,
   nextWanderDelayMs,
   randomPoint,
@@ -104,22 +105,17 @@ export function DuckWalker({ width, height }: Props) {
     };
   }, [reduceMotion, moveTo, bounds]);
 
-  // The duck's box is laid out with its bottom-centre at the anchor point (static offsets below),
-  // so the transform only has to move it to (x, y), scale it and flip it. Scaling happens about
-  // the box centre, so the vertical shift keeps the FEET on y whatever the scale.
-  const boxW = DUCK_W;
-  const boxH = DUCK_H;
-  const duckStyle = useAnimatedStyle(() => {
-    const scale = depthScale(y.get(), bounds);
+  // One animated "anchor" sits exactly on the duck's feet (same kind of style as the red dot,
+  // which tracks correctly). It has no size, so scaling it scales about the feet. The duck box
+  // hangs from the anchor with static offsets. Only plain numbers are used on the UI thread.
+  const { minY, maxY } = bounds;
+  const anchorStyle = useAnimatedStyle(() => {
+    const t = Math.min(Math.max((y.get() - minY) / (maxY - minY), 0), 1);
     return {
-      transform: [
-        { translateX: x.get() },
-        { translateY: y.get() - (boxH / 2) * (scale - 1) },
-        { scale },
-        { scaleX: facing.get() },
-      ],
+      transform: [{ translateX: x.get() }, { translateY: y.get() }, { scale: 0.85 + t * 0.27 }],
     };
   });
+  const flipStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: facing.get() }] }));
 
   const feetDotStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: x.get() }, { translateY: y.get() }],
@@ -133,7 +129,10 @@ export function DuckWalker({ width, height }: Props) {
         // pageX/pageY are screen coordinates; locationX/Y depend on which child got the touch.
         const { pageX, pageY } = e.nativeEvent;
         sceneRef.current?.measureInWindow((ox, oy) => {
-          moveTo({ x: pageX - ox, y: pageY - oy });
+          const tap = { x: pageX - ox, y: pageY - oy };
+          // The duck hangs from a size-less anchor, so it cannot receive touches itself.
+          if (isOnDuck(tap, pos.current, depthScale(pos.current.y, bounds))) celebrate();
+          else moveTo(tap);
         });
       }}
     >
@@ -169,14 +168,23 @@ export function DuckWalker({ width, height }: Props) {
         </>
       )}
       <Animated.View
-        style={[
-          { position: 'absolute', left: -boxW / 2, top: -boxH, width: boxW, height: boxH },
-          duckStyle,
-        ]}
+        pointerEvents="none"
+        style={[{ position: 'absolute', left: 0, top: 0, width: 0, height: 0 }, anchorStyle]}
       >
-        <Pressable onPress={celebrate} accessibilityRole="button" hitSlop={8}>
+        <Animated.View
+          style={[
+            {
+              position: 'absolute',
+              left: -DUCK_W / 2,
+              top: -DUCK_H,
+              width: DUCK_W,
+              height: DUCK_H,
+            },
+            flipStyle,
+          ]}
+        >
           <Duck mode={celebrating ? 'dance' : walking ? 'walk' : 'idle'} size={DUCK_H} />
-        </Pressable>
+        </Animated.View>
       </Animated.View>
       {__DEV__ && (
         <Text
