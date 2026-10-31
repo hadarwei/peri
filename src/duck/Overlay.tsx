@@ -403,12 +403,12 @@ export function Glow({ state, boxW, boxH }: { state: DuckState; boxW: number; bo
       style={{ position: 'absolute', left: (boxW - w) / 2, top: boxH - h + boxH * 0.1 }}
     >
       <Defs>
-        <RadialGradient id="duckGlow" cx="50%" cy="58%" r="50%">
+        <RadialGradient id={`duckGlow-${state}`} cx="50%" cy="58%" r="50%">
           <Stop offset="0" stopColor={color} stopOpacity={0.65} />
           <Stop offset="1" stopColor={color} stopOpacity={0} />
         </RadialGradient>
       </Defs>
-      <Rect x={0} y={0} width={w} height={h} fill="url(#duckGlow)" />
+      <Rect x={0} y={0} width={w} height={h} fill={`url(#duckGlow-${state})`} />
     </Svg>
   );
 }
