@@ -13,12 +13,13 @@ export interface Bounds {
   maxY: number;
 }
 
-// The design box is 104x100; shown at 56% because it felt too big on a real phone.
-// Change this one number to resize the duck.
-export const DUCK_H = 56;
+// The design box is 104x100. The duck itself fills only about half the width and two thirds of
+// the height of its picture (the rest is transparent), so the visible duck is about 56x65 px.
+// Change DUCK_H to resize the duck; everything else follows.
+export const DUCK_H = 100;
 export const DUCK_W = (DUCK_H * 260) / 250; // frames are 260x250
-// Feet band: the whole meadow. At the top the whole duck (56 px at the far scale) still fits.
-export const FEET_MIN_Y = 60;
+// Feet band: the whole meadow. At the top the whole duck (its picture top may poke out, the visible duck does not) still fits.
+export const FEET_MIN_Y = 75;
 export const FEET_MAX_Y = 300;
 export const EDGE_MARGIN = 40;
 export const SPEED_PX_PER_S = 75;
@@ -79,7 +80,8 @@ export function walkableBounds(sceneWidth: number): Bounds {
 
 /** True if a tap (scene coordinates) lands on the duck drawn with its feet at `feet`. */
 export function isOnDuck(tap: Point, feet: Point, scale: number): boolean {
-  const halfW = (DUCK_W * scale) / 2;
-  const h = DUCK_H * scale;
+  // Only the visible duck counts, not the transparent padding of its picture.
+  const halfW = DUCK_W * 0.35 * scale;
+  const h = DUCK_H * 0.7 * scale;
   return Math.abs(tap.x - feet.x) <= halfW && tap.y <= feet.y && tap.y >= feet.y - h;
 }

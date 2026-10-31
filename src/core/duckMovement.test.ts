@@ -49,7 +49,7 @@ describe('duck movement', () => {
   });
 
   it('keeps the feet inside the meadow, 40 px from each side', () => {
-    expect(walkableBounds(390)).toEqual({ minX: 40, maxX: 350, minY: 60, maxY: 300 });
+    expect(walkableBounds(390)).toEqual({ minX: 40, maxX: 350, minY: 75, maxY: 300 });
   });
 
   it('hit-tests the duck box above its feet', () => {

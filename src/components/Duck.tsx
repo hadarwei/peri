@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, View } from 'react-native';
 import Animated, {
   Easing,
   cancelAnimation,
@@ -66,9 +66,16 @@ export function Duck({ mode, size = 96 }: Props) {
 
   const width = (size * 260) / 250; // stand/walk/dance frames are 260x250
   return (
-    <View style={{ width, height: size }} pointerEvents="none">
+    <View style={{ width, height: size, overflow: 'hidden' }} pointerEvents="none">
       {LAYERS.map((name) => (
-        <FrameLayer key={name} name={name} sequence={sequence} progress={progress} />
+        <FrameLayer
+          key={name}
+          name={name}
+          sequence={sequence}
+          progress={progress}
+          width={width}
+          height={size}
+        />
       ))}
     </View>
   );
@@ -78,17 +85,22 @@ function FrameLayer({
   name,
   sequence,
   progress,
+  width,
+  height,
 }: {
   name: DuckFrame;
   sequence: readonly DuckFrame[];
   progress: { value: number };
+  width: number;
+  height: number;
 }) {
   const style = useAnimatedStyle(() => ({
     opacity: frameForProgress(sequence, progress.value) === name ? 1 : 0,
   }));
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, style]}>
-      <Image source={duckFrames[name]} style={StyleSheet.absoluteFill} resizeMode="contain" />
+    // Explicit pixel sizes on every layer: the picture must fill exactly the box and no more.
+    <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width, height }, style]}>
+      <Image source={duckFrames[name]} style={{ width, height, resizeMode: 'contain' }} />
     </Animated.View>
   );
 }
