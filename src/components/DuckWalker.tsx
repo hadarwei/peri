@@ -22,6 +22,7 @@ import {
   walkableBounds,
   type Point,
 } from '../core/duckMovement';
+import type { DuckState } from '../core/duckState';
 import { useDuck } from '../duck/DuckProvider';
 import { CloudMessage } from './CloudMessage';
 import { Duck } from './Duck';
@@ -37,8 +38,9 @@ const DEBUG_DUCK = false;
  * `front` draws the duck on top of everything without taking touches, so it can walk over the
  * greeting text and the header buttons stay tappable.
  */
-export function useDuckWalker(width: number, height: number) {
+export function useDuckWalker(width: number, height: number, state: DuckState = 'normal') {
   const reduceMotion = useReducedMotion();
+  const dreaming = state === 'dreaming';
   const { celebrating, celebrate, message } = useDuck();
   const bounds = useMemo(() => walkableBounds(width), [width]);
 
@@ -93,7 +95,7 @@ export function useDuckWalker(width: number, height: number) {
 
   // Wander to a new random point every 2.5 to 5.5 seconds (not while dancing).
   useEffect(() => {
-    if (reduceMotion) return;
+    if (reduceMotion || dreaming) return; // a sleeping duck does not wander
     const schedule = () => {
       wanderTimer.current = setTimeout(() => {
         wanders.current += 1;
@@ -106,7 +108,7 @@ export function useDuckWalker(width: number, height: number) {
       if (wanderTimer.current) clearTimeout(wanderTimer.current);
       if (stopTimer.current) clearTimeout(stopTimer.current);
     };
-  }, [reduceMotion, moveTo, bounds]);
+  }, [reduceMotion, dreaming, moveTo, bounds]);
 
   // One animated "anchor" sits exactly on the duck's feet. It has no size, so scaling it scales
   // about the feet. The duck box hangs from it with static offsets. Plain numbers only on the UI
@@ -171,7 +173,11 @@ export function useDuckWalker(width: number, height: number) {
             flipStyle,
           ]}
         >
-          <Duck mode={celebrating ? 'dance' : walking ? 'walk' : 'idle'} size={DUCK_H} />
+          <Duck
+            mode={celebrating ? 'dance' : dreaming ? 'rest' : walking ? 'walk' : 'idle'}
+            state={state}
+            size={DUCK_H}
+          />
         </Animated.View>
       </Animated.View>
       <CloudMessage message={message} x={x} y={y} sceneWidth={width} sceneHeight={height} />

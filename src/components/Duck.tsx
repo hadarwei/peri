@@ -12,10 +12,14 @@ import Animated, {
 
 import { duckFrames, type DuckFrame } from '../assets/duckFrames';
 import { DUCK_SEQUENCES, FRAME_MS, frameForProgress, type DuckMode } from '../core/duckSequence';
+import type { DuckState } from '../core/duckState';
+import { REST_H, REST_SCALE, REST_W } from '../duck/anchors';
+import { FrameOverlay, Glow } from '../duck/Overlay';
 
 // Frames that can be on screen. All are mounted at once and only their opacity changes.
 const HAPPY_ONLY: readonly DuckFrame[] = ['happy'];
 const LAYERS: DuckFrame[] = [
+  'rest',
   'stand',
   'walk1',
   'walk2',
@@ -28,6 +32,8 @@ const LAYERS: DuckFrame[] = [
 
 interface Props {
   mode: DuckMode;
+  /** How the duck looks (accessories); defaults to a plain duck. */
+  state?: DuckState;
   /** Height of the duck in px. */
   size?: number;
 }
@@ -40,7 +46,7 @@ interface Props {
  * React re-render every 150 ms on the JS thread, which can stutter when that thread is busy
  * (database work, other screens). Opacity changes never touch the JS thread.
  */
-export function Duck({ mode, size = 96 }: Props) {
+export function Duck({ mode, state = 'normal', size = 96 }: Props) {
   const reduceMotion = useReducedMotion();
   const progress = useSharedValue(0);
 
@@ -65,8 +71,10 @@ export function Duck({ mode, size = 96 }: Props) {
   }, [sequence, progress]);
 
   const width = (size * 260) / 250; // stand/walk/dance frames are 260x250
+  const party = mode === 'dance';
   return (
-    <View style={{ width, height: size, overflow: 'hidden' }} pointerEvents="none">
+    <View style={{ width, height: size }} pointerEvents="none">
+      <Glow state={state} boxW={width} boxH={size} />
       {LAYERS.map((name) => (
         <FrameLayer
           key={name}
@@ -75,6 +83,8 @@ export function Duck({ mode, size = 96 }: Props) {
           progress={progress}
           width={width}
           height={size}
+          state={state}
+          party={party}
         />
       ))}
     </View>
@@ -87,20 +97,32 @@ function FrameLayer({
   progress,
   width,
   height,
+  state,
+  party,
 }: {
   name: DuckFrame;
   sequence: readonly DuckFrame[];
   progress: { value: number };
   width: number;
   height: number;
+  state: DuckState;
+  party: boolean;
 }) {
   const style = useAnimatedStyle(() => ({
     opacity: frameForProgress(sequence, progress.value) === name ? 1 : 0,
   }));
+  // The resting picture is wide, so it gets its own size: half the standing duck's height,
+  // bottom-aligned and centred in the box.
+  const isRest = name === 'rest';
+  const w = isRest ? height * REST_SCALE * (REST_W / REST_H) : width;
+  const h = isRest ? height * REST_SCALE : height;
+  const left = (width - w) / 2;
+  const top = height - h;
   return (
     // Explicit pixel sizes on every layer: the picture must fill exactly the box and no more.
-    <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width, height }, style]}>
-      <Image source={duckFrames[name]} style={{ width, height, resizeMode: 'contain' }} />
+    <Animated.View style={[{ position: 'absolute', left, top, width: w, height: h }, style]}>
+      <Image source={duckFrames[name]} style={{ width: w, height: h, resizeMode: 'contain' }} />
+      <FrameOverlay state={state} party={party} frame={name} boxW={w} boxH={h} />
     </Animated.View>
   );
 }

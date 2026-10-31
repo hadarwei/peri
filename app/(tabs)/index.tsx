@@ -6,6 +6,7 @@ import { CycleStrip } from '../../src/components/CycleStrip';
 import { useDuck } from '../../src/duck/DuckProvider';
 import { useDuckWalker } from '../../src/components/DuckWalker';
 import { MEADOW_HEIGHT, MeadowScene } from '../../src/components/MeadowScene';
+import { DUCK_STATES, type DuckState } from '../../src/core/duckState';
 import { toLocalDateString } from '../../src/core/dates';
 import { getDb } from '../../src/db';
 import { countDayLogs, upsertDayLog } from '../../src/db/repos';
@@ -15,7 +16,8 @@ import { colors, MIN_TOUCH, radii, type } from '../../src/theme';
 export default function TodayScreen() {
   const { width } = useWindowDimensions();
   const { celebrate, sayHello } = useDuck();
-  const duckLayers = useDuckWalker(width, MEADOW_HEIGHT);
+  const [duckState, setDuckState] = useState<DuckState>('normal'); // dev picker for now
+  const duckLayers = useDuckWalker(width, MEADOW_HEIGHT, duckState);
   const [count, setCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
@@ -67,6 +69,32 @@ export default function TodayScreen() {
       <View style={{ padding: 16, gap: 16 }}>
         {/* Static sample data until stage 6 computes the real cycle day. */}
         <CycleStrip dayOfCycle={12} />
+        {/* Dev-only picker for the duck's look (the real state comes from the cycle in stage 6). */}
+        {__DEV__ && (
+          <View
+            style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}
+          >
+            {DUCK_STATES.map((s) => (
+              <Pressable
+                key={s}
+                onPress={() => setDuckState(s)}
+                style={{
+                  minHeight: MIN_TOUCH,
+                  paddingHorizontal: 14,
+                  justifyContent: 'center',
+                  borderRadius: radii.pill,
+                  backgroundColor: s === duckState ? colors.primary : colors.card,
+                  borderWidth: 1,
+                  borderColor: colors.cardBorder,
+                }}
+              >
+                <Text style={[type.label, { color: s === duckState ? '#FFFFFF' : colors.ink }]}>
+                  {t(`duckState.${s}`)}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
         {/* Dev-only smoke test of persistence (removed in a later stage). */}
         {__DEV__ && (
           <View style={{ alignItems: 'center', gap: 12 }}>

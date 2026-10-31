@@ -1,12 +1,13 @@
 import type { DuckFrame } from '../assets/duckFrames';
 
-export type DuckMode = 'idle' | 'walk' | 'dance';
+export type DuckMode = 'idle' | 'walk' | 'dance' | 'rest';
 
 /** Frame order for each animation. Walk and dance both go 1, 2, 3, 2 so the loop is smooth. */
 export const DUCK_SEQUENCES: Record<DuckMode, readonly DuckFrame[]> = {
   idle: ['stand'],
   walk: ['walk1', 'walk2', 'walk3', 'walk2'],
   dance: ['dance1', 'dance2', 'dance3', 'dance2'],
+  rest: ['rest'],
 };
 
 export const FRAME_MS = 150;
