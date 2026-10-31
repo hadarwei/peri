@@ -1,4 +1,4 @@
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 
@@ -20,6 +20,7 @@ import { colors, MIN_TOUCH, radii, type } from '../../src/theme';
 
 export default function TodayScreen() {
   const { width } = useWindowDimensions();
+  const router = useRouter();
   const { celebrate, sayHello } = useDuck();
   const [duckState, setDuckState] = useState<DuckState>('normal'); // dev picker for now
   const duckLayers = useDuckWalker(width, MEADOW_HEIGHT, duckState);
@@ -72,6 +73,19 @@ export default function TodayScreen() {
     >
       <MeadowScene behind={duckLayers.behind} front={duckLayers.front} />
       <View style={{ padding: 16, gap: 16 }}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push('/checkin')}
+          style={{
+            minHeight: MIN_TOUCH + 8,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: radii.card,
+            backgroundColor: colors.primary,
+          }}
+        >
+          <Text style={[type.heading, { color: '#FFFFFF' }]}>{t('checkin.open')}</Text>
+        </Pressable>
         {/* Static sample data until stage 6 computes the real cycle (day 12 of 28). */}
         <CycleStrip dayOfCycle={12} />
         <View style={{ flexDirection: 'row', gap: 12 }}>

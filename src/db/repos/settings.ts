@@ -14,3 +14,8 @@ export async function setSetting(db: Db, key: string, value: string): Promise<vo
     [key, value],
   );
 }
+
+/** Reads an on/off setting stored as '1' or '0'. Missing means off. */
+export async function getFlag(db: Db, key: string): Promise<boolean> {
+  return (await getSetting(db, key)) === '1';
+}
