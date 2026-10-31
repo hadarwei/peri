@@ -5,6 +5,18 @@ export const he = {
     calendar: 'יומן',
     me: 'אני',
   },
+  today: {
+    greeting: 'בוקר טוב',
+    privacyChip: 'הכול נשמר רק על המכשיר',
+    settings: 'הגדרות',
+    dayOfCycle: 'יום {day} מתוך {length}',
+  },
+  phase: {
+    period: 'מחזור',
+    follicular: 'לפני הביוץ',
+    fertile: 'חלון פוריות',
+    luteal: 'אחרי הביוץ',
+  },
   dev: {
     logCount: 'מספר רישומים שנשמרו',
     addTestLog: 'הוסף רישום בדיקה',

@@ -1,8 +1,8 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
-import { duckFrames } from '../../src/assets/duckFrames';
+import { MeadowScene } from '../../src/components/MeadowScene';
 import { toLocalDateString } from '../../src/core/dates';
 import { getDb } from '../../src/db';
 import { countDayLogs, upsertDayLog } from '../../src/db/repos';
@@ -46,49 +46,44 @@ export default function TodayScreen() {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 16,
-        backgroundColor: colors.ground,
-      }}
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.ground }}
+      contentContainerStyle={{ paddingBottom: 32 }}
     >
-      <Text style={[type.title, { color: colors.ink }]}>{t('tabs.today')}</Text>
-      {/* Proof that the bundled duck frame loads (replaced by the animated Duck component). */}
-      <Image source={duckFrames.stand} style={{ width: 120, height: 120 }} resizeMode="contain" />
-      {/* Dev-only smoke test of persistence (removed in a later stage). */}
-      {__DEV__ && (
-        <>
-          <Text style={[type.body, { color: colors.muted }]}>
-            {`${t('dev.logCount')}: ${count ?? t('dev.loading')}`}
-          </Text>
-          <Pressable
-            onPress={addTestLog}
-            style={({ pressed }) => ({
-              minHeight: MIN_TOUCH,
-              paddingHorizontal: 20,
-              justifyContent: 'center',
-              borderRadius: radii.card,
-              backgroundColor: colors.primary,
-              opacity: pressed ? 0.6 : 1,
-            })}
-          >
-            <Text style={[type.label, { color: '#FFFFFF' }]}>{t('dev.addTestLog')}</Text>
-          </Pressable>
-          {saved && (
-            <Text
-              style={[type.caption, { color: colors.muted }]}
-            >{`${t('dev.saved')}: ${saved}`}</Text>
-          )}
-          {error && (
-            <Text
-              style={[type.caption, { color: '#B00020' }]}
-            >{`${t('dev.dbError')}: ${error}`}</Text>
-          )}
-        </>
-      )}
-    </View>
+      <MeadowScene />
+      <View style={{ padding: 16, gap: 16 }}>
+        {/* Dev-only smoke test of persistence (removed in a later stage). */}
+        {__DEV__ && (
+          <View style={{ alignItems: 'center', gap: 12 }}>
+            <Text style={[type.body, { color: colors.muted }]}>
+              {`${t('dev.logCount')}: ${count ?? t('dev.loading')}`}
+            </Text>
+            <Pressable
+              onPress={addTestLog}
+              style={({ pressed }) => ({
+                minHeight: MIN_TOUCH,
+                paddingHorizontal: 20,
+                justifyContent: 'center',
+                borderRadius: radii.card,
+                backgroundColor: colors.primary,
+                opacity: pressed ? 0.6 : 1,
+              })}
+            >
+              <Text style={[type.label, { color: '#FFFFFF' }]}>{t('dev.addTestLog')}</Text>
+            </Pressable>
+            {saved && (
+              <Text style={[type.caption, { color: colors.muted }]}>
+                {`${t('dev.saved')}: ${saved}`}
+              </Text>
+            )}
+            {error && (
+              <Text style={[type.caption, { color: '#B00020' }]}>
+                {`${t('dev.dbError')}: ${error}`}
+              </Text>
+            )}
+          </View>
+        )}
+      </View>
+    </ScrollView>
   );
 }
