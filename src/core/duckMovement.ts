@@ -13,8 +13,9 @@ export interface Bounds {
   maxY: number;
 }
 
-export const DUCK_W = 104;
-export const DUCK_H = 100;
+// The design box is 104x100; shown at 80% because it felt too big on a real phone.
+export const DUCK_H = 80;
+export const DUCK_W = (DUCK_H * 260) / 250; // frames are 260x250
 export const FEET_MIN_Y = 215;
 export const FEET_MAX_Y = 298;
 export const EDGE_MARGIN = 55;

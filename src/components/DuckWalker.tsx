@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import Animated, {
   Easing,
   cancelAnimation,
@@ -43,6 +43,8 @@ export function DuckWalker({ width, height }: Props) {
   const y = useSharedValue(start.y);
   const facing = useSharedValue<1 | -1>(1);
   const [walking, setWalking] = useState(false);
+  const [debug, setDebug] = useState('');
+  const wanders = useRef(0);
 
   const pos = useRef<Point>(start); // where the duck is (or is heading), for the JS side
   const face = useRef<1 | -1>(1);
@@ -56,6 +58,11 @@ export function DuckWalker({ width, height }: Props) {
   const moveTo = useCallback(
     (target: Point) => {
       const to = clampToBounds(target, bounds);
+      if (__DEV__) {
+        setDebug(
+          `tap/target ${Math.round(target.x)},${Math.round(target.y)} -> ${Math.round(to.x)},${Math.round(to.y)} | from ${Math.round(pos.current.x)},${Math.round(pos.current.y)} | wanders ${wanders.current} | reduceMotion ${reduceMotion}`,
+        );
+      }
       const from = pos.current;
       face.current = facingScaleX(from, to, face.current);
       facing.set(face.current);
@@ -84,6 +91,7 @@ export function DuckWalker({ width, height }: Props) {
     if (reduceMotion) return;
     const schedule = () => {
       wanderTimer.current = setTimeout(() => {
+        wanders.current += 1;
         if (!celebratingRef.current) moveTo(randomPoint(bounds));
         schedule();
       }, nextWanderDelayMs());
@@ -120,6 +128,20 @@ export function DuckWalker({ width, height }: Props) {
           <Duck mode={celebrating ? 'dance' : walking ? 'walk' : 'idle'} size={DUCK_H} />
         </Pressable>
       </Animated.View>
+      {__DEV__ && (
+        <Text
+          style={{
+            position: 'absolute',
+            bottom: 2,
+            left: 4,
+            right: 4,
+            fontSize: 9,
+            color: '#1F3347',
+          }}
+        >
+          {debug}
+        </Text>
+      )}
     </Pressable>
   );
 }
