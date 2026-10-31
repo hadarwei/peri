@@ -47,7 +47,7 @@ describe('duck movement', () => {
     expect(nextWanderDelayMs(() => 1)).toBe(5500);
   });
 
-  it('keeps the feet in the lower meadow band, 55 px from each side', () => {
-    expect(walkableBounds(390)).toEqual({ minX: 55, maxX: 335, minY: 215, maxY: 298 });
+  it('keeps the feet inside the meadow, 40 px from each side', () => {
+    expect(walkableBounds(390)).toEqual({ minX: 40, maxX: 350, minY: 170, maxY: 300 });
   });
 });

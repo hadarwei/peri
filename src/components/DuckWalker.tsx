@@ -104,15 +104,22 @@ export function DuckWalker({ width, height }: Props) {
     };
   }, [reduceMotion, moveTo, bounds]);
 
-  const duckStyle = useAnimatedStyle(() => ({
-    transformOrigin: '50% 100%',
-    transform: [
-      { translateX: x.get() - DUCK_W / 2 },
-      { translateY: y.get() - DUCK_H },
-      { scale: depthScale(y.get(), bounds) },
-      { scaleX: facing.get() },
-    ],
-  }));
+  // The duck's box is laid out with its bottom-centre at the anchor point (static offsets below),
+  // so the transform only has to move it to (x, y), scale it and flip it. Scaling happens about
+  // the box centre, so the vertical shift keeps the FEET on y whatever the scale.
+  const boxW = DUCK_W;
+  const boxH = DUCK_H;
+  const duckStyle = useAnimatedStyle(() => {
+    const scale = depthScale(y.get(), bounds);
+    return {
+      transform: [
+        { translateX: x.get() },
+        { translateY: y.get() - (boxH / 2) * (scale - 1) },
+        { scale },
+        { scaleX: facing.get() },
+      ],
+    };
+  });
 
   const feetDotStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: x.get() }, { translateY: y.get() }],
@@ -163,7 +170,7 @@ export function DuckWalker({ width, height }: Props) {
       )}
       <Animated.View
         style={[
-          { position: 'absolute', top: 0, left: 0, width: DUCK_W, height: DUCK_H },
+          { position: 'absolute', left: -boxW / 2, top: -boxH, width: boxW, height: boxH },
           duckStyle,
         ]}
       >
