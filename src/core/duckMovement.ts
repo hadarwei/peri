@@ -13,11 +13,12 @@ export interface Bounds {
   maxY: number;
 }
 
-// The design box is 104x100; shown at 80% because it felt too big on a real phone.
-export const DUCK_H = 80;
+// The design box is 104x100; shown at 56% because it felt too big on a real phone.
+// Change this one number to resize the duck.
+export const DUCK_H = 56;
 export const DUCK_W = (DUCK_H * 260) / 250; // frames are 260x250
-// Feet band: the whole meadow. At the top the whole duck (80 px at the far scale) still fits.
-export const FEET_MIN_Y = 80;
+// Feet band: the whole meadow. At the top the whole duck (56 px at the far scale) still fits.
+export const FEET_MIN_Y = 60;
 export const FEET_MAX_Y = 300;
 export const EDGE_MARGIN = 40;
 export const SPEED_PX_PER_S = 75;
