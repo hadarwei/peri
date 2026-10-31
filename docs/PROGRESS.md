@@ -1,2 +1,3 @@
 - Stage 0 (setup): Expo + TS, lint/prettier, Jest, privacy guard — done 2026-10-30
 - Stage 1 (skeleton + data): 3 tabs RTL, i18n, theme/Rubik, SQLite + migrations + schema, date utils, repos, smoke screen — done 2026-10-31
+- Stage 2 (Today + duck): meadow scene, walking/dancing duck, cloud messages, 9 duck states + period horns, Reduce Motion, assembled Today screen (static sample data) — done 2026-10-31

@@ -1,7 +1,7 @@
 {
   "app": "peri",
   "version": "V1 (manual)",
-  "updated": "2026-10-30",
+  "updated": "2026-10-31",
   "principles": [
     "local-only data",
     "no network calls",
@@ -41,7 +41,7 @@
     },
     "2": {
       "name": "today screen and duck",
-      "status": "in_progress",
+      "status": "done",
       "done": [
         "P2.1 duck frames registered (src/assets/duckFrames.ts), static frame shown on Today",
         "P2.2 MeadowScene (src/components/MeadowScene.tsx)",
@@ -55,16 +55,15 @@
         "P2.8 duck state overlays (react-native-svg): normal, period, pre, fertile, ovulation, late, pregnancy, dreaming (rest frame + thought cloud + zZ), traveling, celebrating (party hat); dev picker on Today",
         "period duck gets devil horns (user request)",
         "P2.9 live Reduce Motion hook (src/hooks/useReduceMotion.ts) used by Duck, DuckWalker, CloudMessage",
-        "P2.10 Today screen assembled: scene+duck+cloud, CycleStrip, 2 PredictionCards (static), MoodRow (celebrates on tap), StreakCard (static 5), DidYouKnowCard (FACTS, reviewed:false)"
+        "P2.10 Today screen assembled: scene+duck+cloud, CycleStrip, 2 PredictionCards (static), MoodRow (celebrates on tap), StreakCard (static 5), DidYouKnowCard (FACTS, reviewed:false)",
+        "duck state frames exported for the designer (transparent PNG pack: composite / overlay-only / glow); designer may send back edited overlay-only files"
       ],
-      "next": [
-        "user: phone check of all duck states + Reduce Motion + full Today screen (CHECK 2c/2d)",
-        "merge stage/2-today-duck into main, tag stage-2-done"
-      ]
+      "next": [],
+      "tag": "stage-2-done"
     },
     "3": {
       "name": "daily log, calendar, history",
-      "status": "todo"
+      "status": "next"
     },
     "4": {
       "name": "temperature and reminders",
@@ -166,5 +165,10 @@
     "RN Image sizes: give explicit width/height, absoluteFill ignored the box",
     "Use pageX/pageY (not locationX/Y) for tap coordinates",
     "Verify visual overlays without a phone: server-render the real components with a react-native-svg shim (esbuild + react-dom/server) over the PNG frames and screenshot with Playwright (/tmp/rend)"
+  ],
+  "open_for_user": [
+    "phone check of all duck states, glows, full Today screen (merged on user request \"lets move on\")",
+    "send back edited overlay PNGs if any",
+    "did-you-know text is unreviewed"
   ]
 }
