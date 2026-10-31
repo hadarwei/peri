@@ -9,4 +9,12 @@ export function t(key: StringKey): string {
   return node as string;
 }
 
+/** Like t(), then fills {placeholders}: tf('today.dayOfCycle', { day: 3, length: 28 }). */
+export function tf(key: StringKey, values: Record<string, string | number>): string {
+  return Object.entries(values).reduce(
+    (text, [name, value]) => text.split(`{${name}}`).join(String(value)),
+    t(key),
+  );
+}
+
 export type { StringKey };

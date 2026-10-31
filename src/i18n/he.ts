@@ -5,6 +5,51 @@ export const he = {
     calendar: 'יומן',
     me: 'אני',
   },
+  today: {
+    greeting: 'בוקר טוב',
+    privacyChip: 'הכול נשמר רק על המכשיר',
+    settings: 'הגדרות',
+    dayOfCycle: 'יום {day} מתוך {length}',
+  },
+  phase: {
+    period: 'מחזור',
+    follicular: 'לפני הביוץ',
+    fertile: 'חלון פוריות',
+    luteal: 'אחרי הביוץ',
+  },
+  predictions: {
+    nextPeriod: 'המחזור הבא',
+    ovulation: 'ביוץ משוער',
+    inDays: 'בעוד {days} ימים',
+    range: 'טווח: {from}-{to} ימים',
+  },
+  mood: {
+    title: 'איך את מרגישה?',
+    skip: 'אפשר לדלג',
+    faces: ['קשה', 'לא מי יודע מה', 'בסדר', 'טוב', 'מעולה'],
+  },
+  streak: {
+    days: '{days} ימים ברצף',
+    note: 'כל כניסה נספרת, גם בלי לרשום',
+  },
+  didYouKnow: {
+    title: 'הידעת?',
+  },
+  cloud: {
+    hello: ['יום רגוע. מה נשמע?', 'בוקר טוב! אני כאן אם צריך.', 'שמחה לראות אותך!'],
+    celebrate: ['כל הכבוד! פרח חדש צמח', 'איזה כיף, עוד רישום!', 'יופי! ככה ממשיכים.'],
+  },
+  duckState: {
+    normal: 'רגיל',
+    period: 'מחזור',
+    pre: 'לפני ביוץ',
+    fertile: 'פוריות',
+    ovulation: 'ביוץ',
+    late: 'מאחר',
+    pregnancy: 'הריון',
+    dreaming: 'חולם',
+    traveling: 'מטייל',
+  },
   dev: {
     logCount: 'מספר רישומים שנשמרו',
     addTestLog: 'הוסף רישום בדיקה',

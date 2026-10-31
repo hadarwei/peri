@@ -11,6 +11,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 
+import { DuckProvider } from '../src/duck/DuckProvider';
 import '../src/rtl';
 
 // Keep the splash screen visible until the fonts are ready.
@@ -35,7 +36,9 @@ export default function RootLayout() {
     // layout direction ourselves. Children (tab bar, rows) inherit it.
     <View style={{ flex: 1, direction: 'rtl' }}>
       <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }} />
+      <DuckProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </DuckProvider>
     </View>
   );
 }
