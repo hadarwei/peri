@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 
 import { CycleStrip } from '../../src/components/CycleStrip';
+import { useDuck } from '../../src/duck/DuckProvider';
 import { DuckWalker } from '../../src/components/DuckWalker';
 import { MEADOW_HEIGHT, MeadowScene } from '../../src/components/MeadowScene';
 import { toLocalDateString } from '../../src/core/dates';
@@ -13,6 +14,7 @@ import { colors, MIN_TOUCH, radii, type } from '../../src/theme';
 
 export default function TodayScreen() {
   const { width } = useWindowDimensions();
+  const { celebrate } = useDuck();
   const [count, setCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
@@ -42,6 +44,7 @@ export default function TodayScreen() {
       const mood = 1 + Math.floor(Math.random() * 5);
       const log = await upsertDayLog(db, toLocalDateString(new Date()), { mood });
       setCount(await countDayLogs(db)); // update the number right away from the database
+      celebrate(); // saving a log makes the duck dance
       setSaved(`${log.date} · ${new Date().toLocaleTimeString('he-IL')}`);
     } catch (e) {
       setError(String(e));
