@@ -32,12 +32,12 @@
         "P1.4 sqlite + migration runner",
         "P1.5 schema migration 001 (src/db/migrations/001_initial.ts)",
         "P1.6 date utils (src/core/dates.ts) + per-timezone tests",
-        "CHECK 1b passed (typecheck, lint, tests, privacy)"
+        "CHECK 1b passed (typecheck, lint, tests, privacy)",
+        "P1.7 repos: dayLogs (patch-style upsert) + settings, tested on real SQLite",
+        "P1.8 dev smoke screen on Today (awaiting phone check of persistence)"
       ],
       "next": [
-        "P1.7 repos (propose test approach first, wait for answer)",
-        "P1.8 smoke screen",
-        "CHECK 1c + merge"
+        "CHECK 1c (user: tap button, force-close app, reopen, count persists) then merge + tag stage-1-done"
       ]
     },
     "2": {
@@ -72,7 +72,7 @@
   "screens": {
     "app/(tabs)/index.tsx": {
       "tab": "Today (היום)",
-      "status": "placeholder",
+      "status": "dev smoke screen (count of day_logs + add test log button, __DEV__ only)",
       "planned": [
         "duck",
         "today cards",
@@ -107,7 +107,9 @@
     "src/theme": "colors, spacing, radii, typography; Rubik bundled from npm (no network)",
     "src/core/dates.ts": "toLocalDateString, parseLocalDate, addDays, diffInDays, startOfLocalDay; DST-safe",
     "scripts/test-tz.js": "runs date tests under 4 time zones (npm test)",
-    "src/db/schema.test.ts": "runs real migration SQL on node:sqlite (needs Node >= 22.5, to verify on Windows)"
+    "src/db/schema.test.ts": "runs real migration SQL on node:sqlite (needs Node >= 22.5, to verify on Windows)",
+    "src/db/repos": "dayLogs.ts (get/range/count/upsert patch), settings.ts (get/set)",
+    "src/db/testing/nodeSqliteDb.ts": "TEST ONLY Db adapter over node:sqlite"
   },
   "data_model_planned": [
     "cycles",
