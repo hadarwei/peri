@@ -1,10 +1,10 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 
 import { CycleStrip } from '../../src/components/CycleStrip';
-import { Duck } from '../../src/components/Duck';
-import { MeadowScene } from '../../src/components/MeadowScene';
+import { DuckWalker } from '../../src/components/DuckWalker';
+import { MEADOW_HEIGHT, MeadowScene } from '../../src/components/MeadowScene';
 import { toLocalDateString } from '../../src/core/dates';
 import { getDb } from '../../src/db';
 import { countDayLogs, upsertDayLog } from '../../src/db/repos';
@@ -12,6 +12,7 @@ import { t } from '../../src/i18n';
 import { colors, MIN_TOUCH, radii, type } from '../../src/theme';
 
 export default function TodayScreen() {
+  const { width } = useWindowDimensions();
   const [count, setCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
@@ -53,10 +54,7 @@ export default function TodayScreen() {
       contentContainerStyle={{ paddingBottom: 32 }}
     >
       <MeadowScene>
-        {/* Walking in place for now; real movement comes in the next step. */}
-        <View style={{ position: 'absolute', bottom: 24, alignSelf: 'center' }}>
-          <Duck mode="walk" size={110} />
-        </View>
+        <DuckWalker width={width} height={MEADOW_HEIGHT} topInset={130} />
       </MeadowScene>
       <View style={{ padding: 16, gap: 16 }}>
         {/* Static sample data until stage 6 computes the real cycle day. */}

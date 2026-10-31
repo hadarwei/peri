@@ -6,7 +6,7 @@ import { Image, Pressable, Text, View, useWindowDimensions } from 'react-native'
 import { t } from '../i18n';
 import { colors, MIN_TOUCH, radii, spacing, type } from '../theme';
 
-const HEIGHT = 310;
+export const MEADOW_HEIGHT = 310;
 const MEADOW_RATIO = 1385 / 780; // image height / width (assets/meadow.jpg)
 
 interface Props {
@@ -22,7 +22,9 @@ export function MeadowScene({ name, children }: Props) {
   const greeting = name ? `${t('today.greeting')}, ${name}` : t('today.greeting');
 
   return (
-    <View style={{ width, height: HEIGHT, overflow: 'hidden', backgroundColor: colors.ground }}>
+    <View
+      style={{ width, height: MEADOW_HEIGHT, overflow: 'hidden', backgroundColor: colors.ground }}
+    >
       {/* Full-width image anchored to the top; the bottom is cropped by the container. */}
       <Image
         source={require('../../assets/meadow.jpg')}
@@ -30,7 +32,7 @@ export function MeadowScene({ name, children }: Props) {
         resizeMode="cover"
       />
       {children}
-      <View style={{ padding: spacing.lg, gap: spacing.sm }}>
+      <View pointerEvents="box-none" style={{ padding: spacing.lg, gap: spacing.sm }}>
         <View
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
         >
