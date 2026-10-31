@@ -4,12 +4,12 @@ import Animated, {
   Easing,
   cancelAnimation,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
 
+import { useReduceMotion } from '../hooks/useReduceMotion';
 import { duckFrames, type DuckFrame } from '../assets/duckFrames';
 import { DUCK_SEQUENCES, FRAME_MS, frameForProgress, type DuckMode } from '../core/duckSequence';
 import type { DuckState } from '../core/duckState';
@@ -47,7 +47,7 @@ interface Props {
  * (database work, other screens). Opacity changes never touch the JS thread.
  */
 export function Duck({ mode, state = 'normal', size = 96 }: Props) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReduceMotion();
   const progress = useSharedValue(0);
 
   // Reduce Motion: no walking cycle; a dance becomes the single "happy" frame.

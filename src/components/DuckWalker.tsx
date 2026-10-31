@@ -4,7 +4,6 @@ import Animated, {
   Easing,
   cancelAnimation,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
@@ -22,6 +21,7 @@ import {
   walkableBounds,
   type Point,
 } from '../core/duckMovement';
+import { useReduceMotion } from '../hooks/useReduceMotion';
 import type { DuckState } from '../core/duckState';
 import { useDuck } from '../duck/DuckProvider';
 import { CloudMessage } from './CloudMessage';
@@ -39,7 +39,7 @@ const DEBUG_DUCK = false;
  * greeting text and the header buttons stay tappable.
  */
 export function useDuckWalker(width: number, height: number, state: DuckState = 'normal') {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReduceMotion();
   const dreaming = state === 'dreaming';
   const { celebrating, celebrate, message } = useDuck();
   const bounds = useMemo(() => walkableBounds(width), [width]);

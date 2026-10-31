@@ -4,7 +4,6 @@ import Animated, {
   Easing,
   cancelAnimation,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withRepeat,
   withSequence,
@@ -13,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Rect } from 'react-native-svg';
 
+import { useReduceMotion } from '../hooks/useReduceMotion';
 import type { DuckMessage } from '../duck/DuckProvider';
 import { colors, fonts } from '../theme';
 
@@ -69,7 +69,7 @@ function CloudShape() {
  * out when the message is cleared. With Reduce Motion it only fades (no scaling, no bobbing).
  */
 export function CloudMessage({ message, x, y, sceneWidth, sceneHeight }: Props) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReduceMotion();
   // Keep showing the last text while the cloud fades out.
   const [shown, setShown] = useState<DuckMessage | null>(null);
   const appear = useSharedValue(0);
