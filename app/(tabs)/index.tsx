@@ -14,9 +14,17 @@ import { useDuckWalker } from '../../src/components/DuckWalker';
 import { MEADOW_HEIGHT, MeadowScene } from '../../src/components/MeadowScene';
 import { DUCK_STATES, type DuckState } from '../../src/core/duckState';
 import { addDays, parseLocalDate, toLocalDateString } from '../../src/core/dates';
+import { calculateStreak } from '../../src/core/streak';
 import { getDb } from '../../src/db';
+import { notifyDataChanged, useDataVersion } from '../../src/db/dataVersion';
 import { saveCheckIn } from '../../src/db/saveCheckIn';
-import { countDayLogs, startCycle, upsertDayLog } from '../../src/db/repos';
+import {
+  countDayLogs,
+  getCheckinDates,
+  recordCheckin,
+  startCycle,
+  upsertDayLog,
+} from '../../src/db/repos';
 import { colors, MIN_TOUCH, radii, type } from '../../src/theme';
 
 export default function TodayScreen() {
@@ -28,6 +36,8 @@ export default function TodayScreen() {
   const [count, setCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  const [streak, setStreak] = useState(0);
+  const dataVersion = useDataVersion();
 
   // A friendly cloud when the screen opens (after a short pause so the screen settles first).
   useEffect(() => {
@@ -35,28 +45,43 @@ export default function TodayScreen() {
     return () => clearTimeout(timer);
   }, [sayHello]);
 
-  // Re-count every time this tab comes into focus (and on first open).
+  // Opening the Today screen counts as a check-in (it keeps the streak alive).
   useFocusEffect(
     useCallback(() => {
-      let alive = true;
       (async () => {
         try {
-          const n = await countDayLogs(await getDb());
-          if (alive) setCount(n);
-        } catch (e) {
-          if (alive) setError(String(e));
+          await recordCheckin(await getDb(), toLocalDateString(new Date()));
+          notifyDataChanged();
+        } catch {
+          // Not being able to record a visit must never get in the user's way.
         }
       })();
-      return () => {
-        alive = false;
-      };
     }, []),
   );
+
+  // Re-read what this screen shows whenever something was saved (also after the check-in closes).
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const db = await getDb();
+        const [n, dates] = await Promise.all([countDayLogs(db), getCheckinDates(db)]);
+        if (!alive) return;
+        setCount(n);
+        setStreak(calculateStreak(dates, toLocalDateString(new Date())));
+      } catch (e) {
+        if (alive) setError(String(e));
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [dataVersion]);
 
   const quickMood = async (mood: number) => {
     try {
       await saveCheckIn(await getDb(), toLocalDateString(new Date()), { mood }, true);
-      setCount(await countDayLogs(await getDb()));
+      notifyDataChanged();
     } catch (e) {
       setError(String(e));
     }
@@ -69,6 +94,7 @@ export default function TodayScreen() {
       const start = toLocalDateString(addDays(parseLocalDate(toLocalDateString(new Date())), -26));
       await startCycle(db, start, 'logged');
       setSaved(`cycle ${start}`);
+      notifyDataChanged();
     } catch (e) {
       setError(String(e));
     }
@@ -78,6 +104,7 @@ export default function TodayScreen() {
     try {
       await (await getDb()).runAsync('DELETE FROM cycles');
       setSaved('cycles deleted');
+      notifyDataChanged();
     } catch (e) {
       setError(String(e));
     }
@@ -89,7 +116,7 @@ export default function TodayScreen() {
       const db = await getDb();
       const mood = 1 + Math.floor(Math.random() * 5);
       const log = await upsertDayLog(db, toLocalDateString(new Date()), { mood });
-      setCount(await countDayLogs(db)); // update the number right away from the database
+      notifyDataChanged();
       celebrate(); // saving a log makes the duck dance
       setSaved(`${log.date} · ${new Date().toLocaleTimeString('he-IL')}`);
     } catch (e) {
@@ -137,7 +164,7 @@ export default function TodayScreen() {
         </View>
         {/* A tap on a face saves today's mood (and counts as a check-in) and the duck celebrates. */}
         <MoodRow onPick={quickMood} />
-        <StreakCard days={5} />
+        <StreakCard days={streak} />
         <DidYouKnowCard fact={FACTS[0]} />
         {/* Dev-only picker for the duck's look (the real state comes from the cycle in stage 6). */}
         {__DEV__ && (

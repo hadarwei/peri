@@ -20,6 +20,7 @@ import { simplePrediction } from '../src/core/simplePrediction';
 import { getTodayCards, type TodayCard } from '../src/core/todayCards';
 import { topSymptoms } from '../src/core/topSymptoms';
 import { getDb } from '../src/db';
+import { notifyDataChanged } from '../src/db/dataVersion';
 import { saveCheckIn } from '../src/db/saveCheckIn';
 import { useDuck } from '../src/duck/DuckProvider';
 import {
@@ -135,6 +136,7 @@ export default function CheckInScreen() {
         },
         !isDraftEmpty(draft),
       );
+      notifyDataChanged();
       celebrate();
       router.back();
     } catch {
@@ -147,6 +149,7 @@ export default function CheckInScreen() {
     try {
       await startCycle(await getDb(), today, 'logged');
       setPeriodStarted(true);
+      notifyDataChanged();
       if (draft.flow === null) patch({ flow: 2 }); // a sensible default; the user can change it
       celebrate();
     } catch {
