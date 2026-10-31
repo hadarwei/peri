@@ -43,12 +43,12 @@
       "name": "today screen and duck",
       "status": "in_progress",
       "done": [
-        "P2.1 duck frames registered (src/assets/duckFrames.ts), static frame shown on Today"
+        "P2.1 duck frames registered (src/assets/duckFrames.ts), static frame shown on Today",
+        "P2.2 MeadowScene (src/components/MeadowScene.tsx)",
+        "P2.3 CycleStrip + phaseForDay (static sample day 12)"
       ],
       "next": [
-        "P2.2 MeadowScene",
-        "P2.3 CycleStrip",
-        "CHECK 2a",
+        "CHECK 2a (phone: compare Today screen to spec)",
         "P2.4 Duck walk cycle",
         "P2.5 movement",
         "P2.6 celebration + haptic",
@@ -128,7 +128,10 @@
     "src/db/repos": "dayLogs.ts (get/range/count/upsert patch), settings.ts (get/set)",
     "src/db/testing/nodeSqliteDb.ts": "TEST ONLY Db adapter over node:sqlite",
     "assets/duck": "9 frames; sizes differ (stand/walk/dance 260x250, happy 183x111, rest 491x249) - Duck component must size per frame",
-    "assets/meadow.jpg": "780x1385 portrait; used as 390x310 cover header"
+    "assets/meadow.jpg": "780x1385 portrait; used as 390x310 cover header",
+    "src/components": "MeadowScene (header, greeting, privacy chip, settings->Me), CycleStrip (28 phase segments + duck marker)",
+    "src/core/phase.ts": "phaseForDay(day) display phases for sample 28-day cycle (placeholder until stage 6)",
+    "src/i18n/index.ts": "t(key) and tf(key, values) for {placeholders}"
   },
   "data_model_planned": [
     "cycles",
