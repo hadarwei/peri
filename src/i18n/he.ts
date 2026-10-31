@@ -5,6 +5,12 @@ export const he = {
     calendar: 'יומן',
     me: 'אני',
   },
+  dev: {
+    logCount: 'מספר רישומים שנשמרו',
+    addTestLog: 'הוסף רישום בדיקה',
+    loading: 'טוען…',
+    dbError: 'שגיאת מסד נתונים',
+  },
 } as const;
 
 type Join<K, P> = K extends string ? (P extends string ? `${K}.${P}` : never) : never;
