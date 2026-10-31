@@ -52,13 +52,14 @@
         "P2.4-2.6 duck animation, walking, celebration verified on phone (size fixed: pictures need explicit width/height; DUCK_H=100 design box, visible duck ~56x65)",
         "debug overlays behind DEBUG_DUCK flag in DuckWalker.tsx",
         "P2.7 CloudMessage (react-native-svg cloud, follows duck, 5s, rotating messages from he.cloud; shown on screen load via sayHello and on celebrate)",
-        "P2.8 duck state overlays (react-native-svg): normal, period, pre, fertile, ovulation, late, pregnancy, dreaming (rest frame + thought cloud + zZ), traveling, celebrating (party hat); dev picker on Today"
+        "P2.8 duck state overlays (react-native-svg): normal, period, pre, fertile, ovulation, late, pregnancy, dreaming (rest frame + thought cloud + zZ), traveling, celebrating (party hat); dev picker on Today",
+        "period duck gets devil horns (user request)",
+        "P2.9 live Reduce Motion hook (src/hooks/useReduceMotion.ts) used by Duck, DuckWalker, CloudMessage",
+        "P2.10 Today screen assembled: scene+duck+cloud, CycleStrip, 2 PredictionCards (static), MoodRow (celebrates on tap), StreakCard (static 5), DidYouKnowCard (FACTS, reviewed:false)"
       ],
       "next": [
-        "phone check of every state (CHECK 2c) incl. glow",
-        "P2.9 reduce motion (duck + cloud already respect it; verify)",
-        "P2.10 assemble Today",
-        "CHECK 2d + merge"
+        "user: phone check of all duck states + Reduce Motion + full Today screen (CHECK 2c/2d)",
+        "merge stage/2-today-duck into main, tag stage-2-done"
       ]
     },
     "3": {
@@ -89,7 +90,7 @@
   "screens": {
     "app/(tabs)/index.tsx": {
       "tab": "Today (היום)",
-      "status": "dev smoke screen (count of day_logs + add test log button, __DEV__ only)",
+      "status": "assembled (static sample data; dev state picker + smoke test at the bottom, dev only)",
       "planned": [
         "duck",
         "today cards",
@@ -141,7 +142,9 @@
     "src/core/pickMessage.ts": "random message index, never repeats last",
     "src/duck/Overlay.tsx": "SVG accessories per frame (FrameOverlay) + Glow; coordinates in picture units 260x250 (rest: 491x249)",
     "src/duck/anchors.ts": "measured head/back anchor per frame, REST_SCALE=0.5",
-    "src/core/duckState.ts": "DUCK_STATES list/type"
+    "src/core/duckState.ts": "DUCK_STATES list/type",
+    "src/components/today": "PredictionCard, MoodRow, StreakCard, DidYouKnowCard",
+    "src/content/facts.ts": "did-you-know sample; reviewed:false until a medical professional approves"
   },
   "data_model_planned": [
     "cycles",
