@@ -1,7 +1,8 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 
+import { duckFrames } from '../../src/assets/duckFrames';
 import { toLocalDateString } from '../../src/core/dates';
 import { getDb } from '../../src/db';
 import { countDayLogs, upsertDayLog } from '../../src/db/repos';
@@ -55,6 +56,8 @@ export default function TodayScreen() {
       }}
     >
       <Text style={[type.title, { color: colors.ink }]}>{t('tabs.today')}</Text>
+      {/* Proof that the bundled duck frame loads (replaced by the animated Duck component). */}
+      <Image source={duckFrames.stand} style={{ width: 120, height: 120 }} resizeMode="contain" />
       {/* Dev-only smoke test of persistence (removed in a later stage). */}
       {__DEV__ && (
         <>
