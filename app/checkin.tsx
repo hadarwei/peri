@@ -11,16 +11,28 @@ import {
   toggleSymptom,
   type CheckInDraft,
 } from '../src/components/checkin/draft';
+import { PeriodStartCard } from '../src/components/checkin/PeriodStartCard';
 import { MoreDetails } from '../src/components/checkin/MoreDetails';
 import { Card } from '../src/components/Card';
 import { MoodRow } from '../src/components/today/MoodRow';
 import { addDays, parseLocalDate, toLocalDateString } from '../src/core/dates';
+import { simplePrediction } from '../src/core/simplePrediction';
 import { getTodayCards, type TodayCard } from '../src/core/todayCards';
 import { topSymptoms } from '../src/core/topSymptoms';
 import { getDb } from '../src/db';
 import { saveCheckIn } from '../src/db/saveCheckIn';
 import { useDuck } from '../src/duck/DuckProvider';
-import { countCycles, getDayLog, getDayLogsInRange, getFlag, type DayLog } from '../src/db/repos';
+import {
+  countCycles,
+  getDayLog,
+  getDayLogsInRange,
+  getFlag,
+  getLatestCycle,
+  getSetting,
+  setSetting,
+  startCycle,
+  type DayLog,
+} from '../src/db/repos';
 import { t } from '../src/i18n';
 import { he } from '../src/i18n/he';
 import { colors, MIN_TOUCH, radii, spacing, type } from '../src/theme';
@@ -37,6 +49,7 @@ async function load(today: string): Promise<Loaded> {
   const db = await getDb();
   const yesterday = toLocalDateString(addDays(parseLocalDate(today), -1));
   const [
+    latestCycle,
     cycles,
     temperatureEnabled,
     temperatureDaily,
@@ -45,7 +58,9 @@ async function load(today: string): Promise<Loaded> {
     logs,
     todayLog,
     yesterdayLog,
+    dismissedOn,
   ] = await Promise.all([
+    getLatestCycle(db),
     countCycles(db),
     getFlag(db, 'temperature_enabled'),
     getFlag(db, 'temperature_daily'),
@@ -54,14 +69,17 @@ async function load(today: string): Promise<Loaded> {
     getDayLogsInRange(db, toLocalDateString(addDays(parseLocalDate(today), -90)), today),
     getDayLog(db, today),
     getDayLog(db, yesterday),
+    getSetting(db, 'period_start_dismissed_on'),
   ]);
+  const prediction = latestCycle ? simplePrediction(latestCycle.startDate) : null;
   const cards = getTodayCards({
     today,
     hasHistory: cycles > 0,
-    // Predictions arrive in stage 6; until then there is no expected period or fertile window.
-    predictedPeriodStart: null,
-    periodStartMarked: false,
-    fertileWindow: null,
+    // Stand-in prediction (28 days from the last start) until stage 6 does it properly.
+    predictedPeriodStart: prediction?.predictedPeriodStart ?? null,
+    // "Not yet" hides the question for the rest of today.
+    periodStartMarked: dismissedOn === today,
+    fertileWindow: prediction?.fertileWindow ?? null,
     temperatureEnabled,
     temperatureDaily,
     testsEnabled,
@@ -83,6 +101,8 @@ export default function CheckInScreen() {
   const [draft, setDraft] = useState<CheckInDraft>(EMPTY_DRAFT);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [periodStarted, setPeriodStarted] = useState(false);
+  const [periodDismissed, setPeriodDismissed] = useState(false);
   const patch = (p: Partial<CheckInDraft>) => setDraft((d) => ({ ...d, ...p }));
 
   useEffect(() => {
@@ -123,6 +143,26 @@ export default function CheckInScreen() {
     }
   };
 
+  const periodYes = async () => {
+    try {
+      await startCycle(await getDb(), today, 'logged');
+      setPeriodStarted(true);
+      if (draft.flow === null) patch({ flow: 2 }); // a sensible default; the user can change it
+      celebrate();
+    } catch {
+      setFailed(true);
+    }
+  };
+
+  const periodNotYet = async () => {
+    setPeriodDismissed(true);
+    try {
+      await setSetting(await getDb(), 'period_start_dismissed_on', today);
+    } catch {
+      // The card is already hidden for this visit; it may reappear next time. That is harmless.
+    }
+  };
+
   const dateTitle = parseLocalDate(today).toLocaleDateString('he-IL', {
     weekday: 'long',
     day: 'numeric',
@@ -131,6 +171,18 @@ export default function CheckInScreen() {
 
   const renderCard = (card: TodayCard) => {
     switch (card) {
+      case 'periodStart':
+        if (periodDismissed) return null;
+        return (
+          <PeriodStartCard
+            key={card}
+            started={periodStarted}
+            flow={draft.flow}
+            onYes={periodYes}
+            onNotYet={periodNotYet}
+            onFlow={(flow) => patch({ flow })}
+          />
+        );
       case 'mood':
         return <MoodRow key={card} value={draft.mood} onPick={(mood) => patch({ mood })} />;
       case 'sameAsYesterday': {

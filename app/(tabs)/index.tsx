@@ -13,10 +13,10 @@ import { t } from '../../src/i18n';
 import { useDuckWalker } from '../../src/components/DuckWalker';
 import { MEADOW_HEIGHT, MeadowScene } from '../../src/components/MeadowScene';
 import { DUCK_STATES, type DuckState } from '../../src/core/duckState';
-import { toLocalDateString } from '../../src/core/dates';
+import { addDays, parseLocalDate, toLocalDateString } from '../../src/core/dates';
 import { getDb } from '../../src/db';
 import { saveCheckIn } from '../../src/db/saveCheckIn';
-import { countDayLogs, upsertDayLog } from '../../src/db/repos';
+import { countDayLogs, startCycle, upsertDayLog } from '../../src/db/repos';
 import { colors, MIN_TOUCH, radii, type } from '../../src/theme';
 
 export default function TodayScreen() {
@@ -61,6 +61,26 @@ export default function TodayScreen() {
       setError(String(e));
     }
     celebrate();
+  };
+
+  const seedCycle = async () => {
+    try {
+      const db = await getDb();
+      const start = toLocalDateString(addDays(parseLocalDate(toLocalDateString(new Date())), -26));
+      await startCycle(db, start, 'logged');
+      setSaved(`cycle ${start}`);
+    } catch (e) {
+      setError(String(e));
+    }
+  };
+
+  const resetCycles = async () => {
+    try {
+      await (await getDb()).runAsync('DELETE FROM cycles');
+      setSaved('cycles deleted');
+    } catch (e) {
+      setError(String(e));
+    }
   };
 
   const addTestLog = async () => {
@@ -163,6 +183,18 @@ export default function TodayScreen() {
               })}
             >
               <Text style={[type.label, { color: '#FFFFFF' }]}>{t('dev.addTestLog')}</Text>
+            </Pressable>
+            <Pressable
+              onPress={seedCycle}
+              style={{ minHeight: MIN_TOUCH, justifyContent: 'center' }}
+            >
+              <Text style={[type.label, { color: colors.primary }]}>{t('dev.seedCycle')}</Text>
+            </Pressable>
+            <Pressable
+              onPress={resetCycles}
+              style={{ minHeight: MIN_TOUCH, justifyContent: 'center' }}
+            >
+              <Text style={[type.label, { color: colors.muted }]}>{t('dev.resetCycles')}</Text>
             </Pressable>
             {saved && (
               <Text style={[type.caption, { color: colors.muted }]}>

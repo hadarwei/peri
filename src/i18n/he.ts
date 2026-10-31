@@ -35,6 +35,13 @@ export const he = {
     notePlaceholder: 'משהו שחשוב לזכור מהיום',
     defaultSymptoms: ['התכווצויות', 'כאב ראש', 'עייפות', 'נפיחות', 'רגישות בחזה', 'שינויי מצב רוח'],
   },
+  periodStart: {
+    title: 'המחזור התחיל?',
+    yes: 'כן, התחיל',
+    notYet: 'עוד לא',
+    started: 'המחזור התחיל. כמה חזק הדימום?',
+    levels: ['קל', 'בינוני', 'חזק'],
+  },
   predictions: {
     nextPeriod: 'המחזור הבא',
     ovulation: 'ביוץ משוער',
@@ -72,6 +79,8 @@ export const he = {
     logCount: 'מספר רישומים שנשמרו',
     addTestLog: 'הוסף רישום בדיקה',
     loading: 'טוען…',
+    seedCycle: 'מחזור בדיקה (התחיל לפני 26 ימים)',
+    resetCycles: 'מחיקת מחזורי בדיקה',
     saved: 'נשמר',
     dbError: 'שגיאת מסד נתונים',
   },
