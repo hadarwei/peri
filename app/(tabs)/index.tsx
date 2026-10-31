@@ -2,15 +2,20 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 
-import { CycleStrip } from '../../src/components/CycleStrip';
 import { useDuck } from '../../src/duck/DuckProvider';
+import { CycleStrip } from '../../src/components/CycleStrip';
+import { DidYouKnowCard } from '../../src/components/today/DidYouKnowCard';
+import { MoodRow } from '../../src/components/today/MoodRow';
+import { PredictionCard } from '../../src/components/today/PredictionCard';
+import { StreakCard } from '../../src/components/today/StreakCard';
+import { FACTS } from '../../src/content/facts';
+import { t } from '../../src/i18n';
 import { useDuckWalker } from '../../src/components/DuckWalker';
 import { MEADOW_HEIGHT, MeadowScene } from '../../src/components/MeadowScene';
 import { DUCK_STATES, type DuckState } from '../../src/core/duckState';
 import { toLocalDateString } from '../../src/core/dates';
 import { getDb } from '../../src/db';
 import { countDayLogs, upsertDayLog } from '../../src/db/repos';
-import { t } from '../../src/i18n';
 import { colors, MIN_TOUCH, radii, type } from '../../src/theme';
 
 export default function TodayScreen() {
@@ -67,8 +72,28 @@ export default function TodayScreen() {
     >
       <MeadowScene behind={duckLayers.behind} front={duckLayers.front} />
       <View style={{ padding: 16, gap: 16 }}>
-        {/* Static sample data until stage 6 computes the real cycle day. */}
+        {/* Static sample data until stage 6 computes the real cycle (day 12 of 28). */}
         <CycleStrip dayOfCycle={12} />
+        <View style={{ flexDirection: 'row', gap: 12 }}>
+          <PredictionCard
+            title={t('predictions.nextPeriod')}
+            daysExpected={16}
+            daysFrom={14}
+            daysTo={18}
+            accent={colors.period}
+          />
+          <PredictionCard
+            title={t('predictions.ovulation')}
+            daysExpected={2}
+            daysFrom={1}
+            daysTo={4}
+            accent={colors.fertile}
+          />
+        </View>
+        {/* Tapping a face only celebrates for now; saving the mood arrives in stage 3. */}
+        <MoodRow onPick={celebrate} />
+        <StreakCard days={5} />
+        <DidYouKnowCard fact={FACTS[0]} />
         {/* Dev-only picker for the duck's look (the real state comes from the cycle in stage 6). */}
         {__DEV__ && (
           <View
