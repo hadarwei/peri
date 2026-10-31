@@ -14,6 +14,7 @@ import type { DuckFrame } from '../assets/duckFrames';
 import type { DuckState } from '../core/duckState';
 import { colors } from '../theme';
 import { ANCHORS, FRAME_H, FRAME_W, REST_H, REST_HEAD, REST_W } from './anchors';
+import { HORN_NUDGE, PERIOD_HORNS } from './hornShapes';
 import { dropPath, heartPath, quadPoint, sparklePath, type Pt } from './geometry';
 
 // Margins around the picture (picture units) so hats, hearts and clouds can stick out of it.
@@ -98,27 +99,36 @@ function FlowerCrown({ head }: { head: Pt }) {
   );
 }
 
-function DevilHorns({ head }: { head: Pt }) {
-  const { x, y } = head;
-  // Left horn, then the same shape mirrored around the head's centre line.
-  const horn = (side: 1 | -1) => {
-    const px = (dx: number) => x + side * dx;
-    // Thin horn: starts on the head, bends outward and ends in a sharp tip.
-    return (
-      <Path
-        d={`M${px(6)},${y + 12} C${px(5)},${y} ${px(12)},${y - 10} ${px(31)},${y - 17} C${px(26)},${y - 6} ${px(24)},${y + 4} ${px(19)},${y + 13}Z`}
-        fill="#E5383B"
-        stroke="#7A1517"
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
-    );
-  };
+const HORN_RED = '#D93A3A';
+
+/** Horns for the period duck: the traced shape for this frame, or a nearby frame's, shifted. */
+function DevilHorns({ frame, head }: { frame: DuckFrame; head: Pt }) {
+  let paths = PERIOD_HORNS[frame];
+  const nudge = HORN_NUDGE[frame] ?? { x: 0, y: 0 };
+  let shift = { x: nudge.x, y: nudge.y };
+  if (!paths) {
+    // dance2 has no tracing of its own: reuse dance1 and move it with the head.
+    const base = ANCHORS.dance1;
+    paths = PERIOD_HORNS.dance1;
+    if (base) shift = { x: head.x - base.head.x + nudge.x, y: head.y - base.head.y + nudge.y };
+  }
   return (
-    <>
-      {horn(-1)}
-      {horn(1)}
-    </>
+    <G transform={`translate(${shift.x} ${shift.y})`}>
+      {/* Outline first, then the red on top, so the outline only grows outward. */}
+      {paths?.map((d, i) => (
+        <Path
+          key={`o${i}`}
+          d={d}
+          fill="#2B1B1B"
+          stroke="#2B1B1B"
+          strokeWidth={2.6}
+          strokeLinejoin="round"
+        />
+      ))}
+      {paths?.map((d, i) => (
+        <Path key={`f${i}`} d={d} fill={HORN_RED} />
+      ))}
+    </G>
   );
 }
 
@@ -346,7 +356,7 @@ export function FrameOverlay({ state, party, frame, boxW, boxH }: Props) {
             />
           </>
         )}
-        {state === 'period' && !showParty && <DevilHorns head={head} />}
+        {state === 'period' && !showParty && <DevilHorns frame={frame} head={head} />}
         {state === 'pre' && <Sparkles head={head} />}
         {state === 'ovulation' && <Sparkles head={head} />}
         {state === 'pregnancy' && (
