@@ -39,6 +39,7 @@ export default function RootLayout() {
       <DuckProvider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="checkin" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="add-cycle" options={{ presentation: 'modal' }} />
         </Stack>
       </DuckProvider>
     </View>

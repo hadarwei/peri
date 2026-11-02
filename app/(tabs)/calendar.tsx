@@ -179,7 +179,7 @@ export default function CalendarScreen() {
         log={selectedLog}
         onEdit={() => router.push({ pathname: '/checkin', params: { date: selected } })}
       />
-      <CycleHistory cycles={history} />
+      <CycleHistory cycles={history} onAddPrevious={() => router.push('/add-cycle')} />
     </ScrollView>
   );
 }

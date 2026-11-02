@@ -1,9 +1,9 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import type { CycleSummary } from '../../core/history';
 import type { Phase } from '../../core/phase';
 import { t, tf } from '../../i18n';
-import { colors, spacing, type } from '../../theme';
+import { colors, MIN_TOUCH, radii, spacing, type } from '../../theme';
 import { Card } from '../Card';
 
 const PHASE_ORDER: Phase[] = ['period', 'follicular', 'fertile', 'luteal'];
@@ -50,7 +50,13 @@ function CycleCard({ cycle }: { cycle: CycleSummary }) {
 }
 
 /** One card per cycle, newest first. */
-export function CycleHistory({ cycles }: { cycles: CycleSummary[] }) {
+export function CycleHistory({
+  cycles,
+  onAddPrevious,
+}: {
+  cycles: CycleSummary[];
+  onAddPrevious: () => void;
+}) {
   return (
     <View style={{ gap: spacing.md }}>
       <Text style={[type.heading, { color: colors.ink }]}>{t('history.title')}</Text>
@@ -61,6 +67,20 @@ export function CycleHistory({ cycles }: { cycles: CycleSummary[] }) {
       ) : (
         cycles.map((c) => <CycleCard key={c.startDate} cycle={c} />)
       )}
+      <Pressable
+        accessibilityRole="button"
+        onPress={onAddPrevious}
+        style={{
+          minHeight: MIN_TOUCH,
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderRadius: radii.card,
+          borderWidth: 1,
+          borderColor: colors.primary,
+        }}
+      >
+        <Text style={[type.label, { color: colors.primary }]}>{t('addCycle.open')}</Text>
+      </Pressable>
     </View>
   );
 }
