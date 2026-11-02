@@ -1,15 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Card } from '../../src/components/Card';
+import { DayDetails } from '../../src/components/calendar/DayDetails';
 import { MonthGrid } from '../../src/components/calendar/MonthGrid';
-import { monthGrid, shiftMonth, type CycleSpan, type GridCell } from '../../src/core/calendar';
+import {
+  dayInfo,
+  monthGrid,
+  shiftMonth,
+  type CycleSpan,
+  type GridCell,
+} from '../../src/core/calendar';
 import { toLocalDateString } from '../../src/core/dates';
 import type { Phase } from '../../src/core/phase';
 import { getDb } from '../../src/db';
 import { useDataVersion } from '../../src/db/dataVersion';
-import { getCycles, getDayLogsInRange } from '../../src/db/repos';
+import { getCycles, getDayLog, getDayLogsInRange, type DayLog } from '../../src/db/repos';
 import { t } from '../../src/i18n';
 import { colors, MIN_TOUCH, radii, spacing, type } from '../../src/theme';
 
@@ -54,6 +62,9 @@ export default function CalendarScreen() {
   const [cycles, setCycles] = useState<CycleSpan[]>([]);
   const [logged, setLogged] = useState<ReadonlySet<string>>(new Set());
   const dataVersion = useDataVersion();
+  const router = useRouter();
+  const [selected, setSelected] = useState(today);
+  const [selectedLog, setSelectedLog] = useState<DayLog | null>(null);
 
   const weeks: GridCell[][] = monthGrid(ym.year, ym.month);
   const first = weeks[0][0].date;
@@ -71,6 +82,7 @@ export default function CalendarScreen() {
         if (!alive) return;
         setCycles(allCycles.map((c) => ({ startDate: c.startDate, endDate: c.endDate })));
         setLogged(new Set(logs.map((l) => l.date)));
+        setSelectedLog(await getDayLog(db, selected));
       } catch {
         // The grid simply shows no cycles or dots if the database cannot be read.
       }
@@ -78,7 +90,7 @@ export default function CalendarScreen() {
     return () => {
       alive = false;
     };
-  }, [first, last, dataVersion]);
+  }, [first, last, selected, dataVersion]);
 
   const title = new Date(ym.year, ym.month - 1, 1).toLocaleDateString('he-IL', {
     month: 'long',
@@ -107,7 +119,14 @@ export default function CalendarScreen() {
             onPress={() => setYm(shiftMonth(ym.year, ym.month, 1))}
           />
         </View>
-        <MonthGrid weeks={weeks} cycles={cycles} today={today} loggedDates={logged} />
+        <MonthGrid
+          weeks={weeks}
+          cycles={cycles}
+          today={today}
+          loggedDates={logged}
+          selectedDate={selected}
+          onSelect={setSelected}
+        />
         <View
           style={{
             flexDirection: 'row',
@@ -126,6 +145,13 @@ export default function CalendarScreen() {
           ))}
         </View>
       </Card>
+      <DayDetails
+        date={selected}
+        today={today}
+        info={dayInfo(selected, cycles, today)}
+        log={selectedLog}
+        onEdit={() => router.push({ pathname: '/checkin', params: { date: selected } })}
+      />
     </ScrollView>
   );
 }

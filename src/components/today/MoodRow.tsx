@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
+import { MOOD_FACES as FACES } from '../../content/moodFaces';
 import { t } from '../../i18n';
 import { he } from '../../i18n/he';
 import { colors, MIN_TOUCH, radii, spacing, type } from '../../theme';
 import { Card } from '../Card';
-
-const FACES = ['😣', '😕', '🙂', '😊', '🤩'];
 
 /** Skippable mood question. Tapping a face reports it; saving comes in the next stage. */
 export function MoodRow({

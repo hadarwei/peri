@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import type { GridCell, CycleSpan } from '../../core/calendar';
 import { dayInfo } from '../../core/calendar';
@@ -12,10 +12,12 @@ interface Props {
   today: string;
   /** Dates that have a saved day log (shown with a dot). */
   loggedDates: ReadonlySet<string>;
+  selectedDate: string;
+  onSelect: (date: string) => void;
 }
 
 /** Month grid: 7 columns, Sunday first (the layout is right to left, so Sunday is on the right). */
-export function MonthGrid({ weeks, cycles, today, loggedDates }: Props) {
+export function MonthGrid({ weeks, cycles, today, loggedDates, selectedDate, onSelect }: Props) {
   return (
     <View style={{ gap: spacing.xs }}>
       <View style={{ flexDirection: 'row' }}>
@@ -34,11 +36,14 @@ export function MonthGrid({ weeks, cycles, today, loggedDates }: Props) {
             const info = dayInfo(cell.date, cycles, today);
             const isToday = cell.date === today;
             const predicted = info.predicted && !isToday;
+            const selected = cell.date === selectedDate;
             return (
               <View key={cell.date} style={{ flex: 1, padding: 2 }}>
-                <View
-                  accessible
+                <Pressable
+                  accessibilityRole="button"
                   accessibilityLabel={cell.date}
+                  accessibilityState={{ selected }}
+                  onPress={() => onSelect(cell.date)}
                   style={{
                     aspectRatio: 1,
                     borderRadius: 10,
@@ -46,8 +51,8 @@ export function MonthGrid({ weeks, cycles, today, loggedDates }: Props) {
                     justifyContent: 'center',
                     backgroundColor: info.phase ? colors.tint[info.phase] : 'transparent',
                     opacity: cell.inMonth ? 1 : 0.35,
-                    borderWidth: isToday ? 2 : predicted ? 1.5 : 0,
-                    borderColor: isToday ? colors.primary : colors.muted,
+                    borderWidth: isToday || selected ? 2 : predicted ? 1.5 : 0,
+                    borderColor: selected ? colors.ink : isToday ? colors.primary : colors.muted,
                     borderStyle: predicted && !isToday ? 'dashed' : 'solid',
                   }}
                 >
@@ -66,7 +71,7 @@ export function MonthGrid({ weeks, cycles, today, loggedDates }: Props) {
                       }}
                     />
                   )}
-                </View>
+                </Pressable>
               </View>
             );
           })}

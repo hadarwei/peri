@@ -19,6 +19,12 @@ export const he = {
   },
   calendar: {
     previousMonth: 'החודש הקודם',
+    cycleDay: 'יום {day} במחזור',
+    predicted: 'צפי',
+    nothingLogged: 'לא נרשם דבר ביום הזה',
+    futureDay: 'יום עתידי',
+    edit: 'עריכה',
+    add: 'הוספת רישום',
     nextMonth: 'החודש הבא',
   },
   checkin: {

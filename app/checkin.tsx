@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
@@ -97,7 +97,13 @@ async function load(today: string): Promise<Loaded> {
 export default function CheckInScreen() {
   const router = useRouter();
   const { celebrate } = useDuck();
-  const [today] = useState(() => toLocalDateString(new Date()));
+  const params = useLocalSearchParams<{ date?: string }>();
+  const realToday = toLocalDateString(new Date());
+  // The day being filled in: today, or a past day opened from the calendar.
+  const [today] = useState(() =>
+    params.date && params.date <= realToday ? params.date : realToday,
+  );
+  const isRealToday = today === realToday;
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [draft, setDraft] = useState<CheckInDraft>(EMPTY_DRAFT);
   const [saving, setSaving] = useState(false);
@@ -135,6 +141,7 @@ export default function CheckInScreen() {
           note: draft.note,
         },
         !isDraftEmpty(draft),
+        isRealToday, // back-filling a past day does not extend the streak
       );
       notifyDataChanged();
       celebrate();

@@ -30,4 +30,11 @@ describe('saveCheckIn', () => {
     await expect(saveCheckIn(db, '2026-11-01', { mood: 9 }, true)).rejects.toThrow();
     expect(await getCheckinDates(db)).toEqual([]);
   });
+
+  it('filling in a past day saves the log but does not count for the streak', async () => {
+    const db = await createTestDb();
+    await saveCheckIn(db, '2026-10-01', { mood: 3 }, true, false);
+    expect(await getDayLog(db, '2026-10-01')).toMatchObject({ mood: 3 });
+    expect(await getCheckinDates(db)).toEqual([]);
+  });
 });
