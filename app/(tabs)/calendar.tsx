@@ -6,7 +6,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Card } from '../../src/components/Card';
 import { DayDetails } from '../../src/components/calendar/DayDetails';
 import { CycleHistory } from '../../src/components/calendar/CycleHistory';
-import { MonthGrid } from '../../src/components/calendar/MonthGrid';
+import { MonthGrid, PREDICTED_DASH, PREDICTED_GRAY } from '../../src/components/calendar/MonthGrid';
 import {
   dayInfo,
   monthGrid,
@@ -156,6 +156,20 @@ export default function CalendarScreen() {
               <Text style={[type.caption, { color: colors.muted }]}>{t(`phase.${p}`)}</Text>
             </View>
           ))}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+            <View
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: 4,
+                backgroundColor: PREDICTED_GRAY,
+                borderWidth: 1,
+                borderStyle: 'dashed',
+                borderColor: PREDICTED_DASH,
+              }}
+            />
+            <Text style={[type.caption, { color: colors.muted }]}>{t('calendar.predicted')}</Text>
+          </View>
         </View>
       </Card>
       <DayDetails

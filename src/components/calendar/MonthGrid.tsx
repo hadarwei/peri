@@ -2,7 +2,13 @@ import { Pressable, Text, View } from 'react-native';
 
 import type { GridCell, CycleSpan } from '../../core/calendar';
 import { dayInfo } from '../../core/calendar';
+import { blend } from '../../core/color';
 import { colors, spacing, type } from '../../theme';
+
+// Predicted days: the phase colour mixed towards a light gray, with thin light dashes.
+export const PREDICTED_GRAY = '#E3E7EC';
+export const PREDICTED_DASH = '#C4CCD6';
+export const PREDICTED_MIX = 0.6;
 
 const WEEKDAYS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש']; // Sunday first
 
@@ -49,14 +55,18 @@ export function MonthGrid({ weeks, cycles, today, loggedDates, selectedDate, onS
                     borderRadius: 10,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: info.phase ? colors.tint[info.phase] : 'transparent',
+                    backgroundColor: info.phase
+                      ? predicted
+                        ? blend(colors.tint[info.phase], PREDICTED_GRAY, PREDICTED_MIX)
+                        : colors.tint[info.phase]
+                      : 'transparent',
                     opacity: cell.inMonth ? 1 : 0.35,
-                    borderWidth: isToday || selected ? 2 : predicted ? 1.5 : 0,
-                    borderColor: selected ? colors.ink : isToday ? colors.primary : colors.muted,
+                    borderWidth: isToday || selected ? 2 : predicted ? 1 : 0,
+                    borderColor: selected ? colors.ink : isToday ? colors.primary : PREDICTED_DASH,
                     borderStyle: predicted && !isToday ? 'dashed' : 'solid',
                   }}
                 >
-                  <Text style={[type.label, { color: colors.ink }]}>
+                  <Text style={[type.label, { color: predicted ? colors.muted : colors.ink }]}>
                     {Number(cell.date.slice(8))}
                   </Text>
                   {loggedDates.has(cell.date) && (
