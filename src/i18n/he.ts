@@ -17,6 +17,10 @@ export const he = {
     fertile: 'חלון פוריות',
     luteal: 'אחרי הביוץ',
   },
+  calendar: {
+    previousMonth: 'החודש הקודם',
+    nextMonth: 'החודש הבא',
+  },
   checkin: {
     title: 'רישום יומי',
     open: 'לרישום היומי',
@@ -80,8 +84,8 @@ export const he = {
     logCount: 'מספר רישומים שנשמרו',
     addTestLog: 'הוסף רישום בדיקה',
     loading: 'טוען…',
-    seedCycle: 'מחזור בדיקה (התחיל לפני 26 ימים)',
-    resetCycles: 'מחיקת מחזורי בדיקה',
+    seedCycle: 'נתוני בדיקה: 3 מחזורים ורישומים',
+    resetCycles: 'מחיקת מחזורים ורישומים',
     saved: 'נשמר',
     dbError: 'שגיאת מסד נתונים',
   },

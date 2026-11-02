@@ -91,9 +91,15 @@ export default function TodayScreen() {
   const seedCycle = async () => {
     try {
       const db = await getDb();
-      const start = toLocalDateString(addDays(parseLocalDate(toLocalDateString(new Date())), -26));
-      await startCycle(db, start, 'logged');
-      setSaved(`cycle ${start}`);
+      const today = parseLocalDate(toLocalDateString(new Date()));
+      const day = (ago: number) => toLocalDateString(addDays(today, -ago));
+      // Three cycles of 28 days; the latest started 26 days ago (so the period is expected soon).
+      for (const ago of [82, 54, 26]) await startCycle(db, day(ago), 'logged');
+      // A handful of logged days so the calendar shows dots.
+      for (const ago of [80, 78, 70, 55, 52, 40, 30, 27, 25, 24, 20, 10, 5, 2, 1]) {
+        await upsertDayLog(db, day(ago), { mood: 3 + (ago % 3) });
+      }
+      setSaved(`3 cycles, latest ${day(26)}`);
       notifyDataChanged();
     } catch (e) {
       setError(String(e));
@@ -102,7 +108,9 @@ export default function TodayScreen() {
 
   const resetCycles = async () => {
     try {
-      await (await getDb()).runAsync('DELETE FROM cycles');
+      const db = await getDb();
+      await db.runAsync('DELETE FROM cycles');
+      await db.runAsync('DELETE FROM day_logs');
       setSaved('cycles deleted');
       notifyDataChanged();
     } catch (e) {
