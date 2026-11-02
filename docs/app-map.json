@@ -72,13 +72,15 @@
         "P3.6 streak: calculateStreak (src/core/streak.ts), opening Today records a check-in, StreakCard real; src/db/dataVersion.ts (notifyDataChanged/useDataVersion) refreshes screens after saves",
         "P3.7 calendar month grid (src/core/calendar.ts: monthGrid, shiftMonth, phaseForCycleDay, dayInfo; MonthGrid component; legend; month nav)",
         "P3.8 selected-day card (DayDetails) + edit/add any past day via /checkin?date=; back-filling a past day does NOT count for the streak (saveCheckIn countsForStreak)",
-        "P3.9 cycle history list (src/core/history.ts summarizeCycle; CycleHistory component)"
+        "P3.9 cycle history list (src/core/history.ts summarizeCycle; CycleHistory component)",
+        "P3.10 add previous cycle: /add-cycle modal (date picker, \"לא זוכרת\" just closes, can add several; validation future/exists via checkImportDate; source imported)",
+        "P3.11 edit/delete cycles: tap a history card -> action menu -> change start date (same screen in edit mode) or delete with confirmation; updateCycleStart/deleteCycle recompute ends in a transaction (bug found by test: clear ends before moving a start)",
+        "styling: predicted calendar days are grayish with light dashes + legend entry"
       ],
       "next": [
-        "CHECK 3c (phone): calendar + history with the dev seed button (נתוני בדיקה)",
-        "P3.10 add previous cycle (date picker, \"don't remember\")",
-        "P3.11 edit/delete cycles",
-        "CHECK 3d + merge stage 3"
+        "CHECK 3d (phone): add/edit/delete cycles, full flow",
+        "merge stage/3-log-calendar into main, tag stage-3-done",
+        "then stage 4 temperature + reminders"
       ]
     },
     "4": {
@@ -164,10 +166,11 @@
     "src/core/todayCards.ts": "getTodayCards(input) -> ordered card list; decisions: pregnancy mode also hides the period-start card; no history => minimal set even if daily temperature is on",
     "src/db/saveCheckIn.ts": "saves day log + checkin atomically; empty entry records the check-in only",
     "src/db/repos/checkins.ts": "recordCheckin, getCheckinDates",
-    "src/db/repos/cycles.ts": "getCycles, getLatestCycle, startCycle (closes previous), recomputeCycleEnds",
+    "src/db/repos/cycles.ts": "getCycles, getLatestCycle, startCycle, updateCycleStart, deleteCycle, recomputeCycleEnds",
     "src/core/streak.ts": "calculateStreak(dates, today)",
     "src/core/calendar.ts": "monthGrid, shiftMonth, phaseForCycleDay(day,len): period 1-5, fertile = ovulation-5..ovulation (ovulation = len-14), luteal after; dayInfo(date,cycles,today)",
-    "src/core/history.ts": "summarizeCycle(cycle, logs, today): days, periodDays (consecutive flow>0 from start, else null), phaseDays"
+    "src/core/history.ts": "summarizeCycle(cycle, logs, today): days, periodDays (consecutive flow>0 from start, else null), phaseDays",
+    "app/add-cycle.tsx": "add previous cycle / edit a cycle start date (params id, date)"
   },
   "data_model_planned": [
     "cycles",
@@ -188,7 +191,8 @@
     "Only plain numbers and worklet-marked functions on the UI thread; imported helper functions crashed Expo Go",
     "RN Image sizes: give explicit width/height, absoluteFill ignored the box",
     "Use pageX/pageY (not locationX/Y) for tap coordinates",
-    "Verify visual overlays without a phone: server-render the real components with a react-native-svg shim (esbuild + react-dom/server) over the PNG frames and screenshot with Playwright (/tmp/rend)"
+    "Verify visual overlays without a phone: server-render the real components with a react-native-svg shim (esbuild + react-dom/server) over the PNG frames and screenshot with Playwright (/tmp/rend)",
+    "expo lint caches results; npm run lint now uses --no-cache"
   ],
   "open_for_user": [
     "phone check of all duck states, glows, full Today screen (merged on user request \"lets move on\")",
@@ -198,5 +202,14 @@
   "decisions_to_confirm": [
     "no history => no temperature/LH/period-start card even when user chose daily temperature (spec literal)",
     "pregnancy mode hides period-start card too (spec only says fertility cards)"
+  ],
+  "proposals": [
+    {
+      "id": "prediction-history",
+      "status": "proposed, awaiting user decision",
+      "where": "stage 6 right after the prediction engine (new migration 002 predictions table)",
+      "what": "store each prediction as shown (predicted start, range, made_on, algorithm version); when the real period start is logged keep the error in days; use for an accuracy insight and the late state; local only, included in export and delete-all",
+      "why_not_earlier": "stage 3 uses a stand-in 28-day prediction that should not be stored"
+    }
   ]
 }
