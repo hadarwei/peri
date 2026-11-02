@@ -17,6 +17,15 @@ export const he = {
     fertile: 'חלון פוריות',
     luteal: 'אחרי הביוץ',
   },
+  history: {
+    title: 'המחזורים שלי',
+    empty: 'עוד אין מחזורים. כשהמחזור יתחיל, או כשיתווספו מחזורים קודמים, הם יופיעו כאן.',
+    now: 'היום',
+    days: '{days} ימים',
+    daysSoFar: 'יום {days} במחזור הנוכחי',
+    period: 'דימום: {days} ימים',
+    periodUnknown: 'אורך הדימום לא נרשם',
+  },
   calendar: {
     previousMonth: 'החודש הקודם',
     cycleDay: 'יום {day} במחזור',

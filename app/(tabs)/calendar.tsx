@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Card } from '../../src/components/Card';
 import { DayDetails } from '../../src/components/calendar/DayDetails';
+import { CycleHistory } from '../../src/components/calendar/CycleHistory';
 import { MonthGrid } from '../../src/components/calendar/MonthGrid';
 import {
   dayInfo,
@@ -14,6 +15,7 @@ import {
   type GridCell,
 } from '../../src/core/calendar';
 import { toLocalDateString } from '../../src/core/dates';
+import { summarizeCycle, type CycleSummary } from '../../src/core/history';
 import type { Phase } from '../../src/core/phase';
 import { getDb } from '../../src/db';
 import { useDataVersion } from '../../src/db/dataVersion';
@@ -63,6 +65,7 @@ export default function CalendarScreen() {
   const [logged, setLogged] = useState<ReadonlySet<string>>(new Set());
   const dataVersion = useDataVersion();
   const router = useRouter();
+  const [history, setHistory] = useState<CycleSummary[]>([]);
   const [selected, setSelected] = useState(today);
   const [selectedLog, setSelectedLog] = useState<DayLog | null>(null);
 
@@ -83,6 +86,16 @@ export default function CalendarScreen() {
         setCycles(allCycles.map((c) => ({ startDate: c.startDate, endDate: c.endDate })));
         setLogged(new Set(logs.map((l) => l.date)));
         setSelectedLog(await getDayLog(db, selected));
+        const earliest = allCycles[0]?.startDate;
+        const allLogs = earliest ? await getDayLogsInRange(db, earliest, today) : [];
+        if (!alive) return;
+        setHistory(
+          allCycles
+            .map((c) =>
+              summarizeCycle({ startDate: c.startDate, endDate: c.endDate }, allLogs, today),
+            )
+            .reverse(), // newest first
+        );
       } catch {
         // The grid simply shows no cycles or dots if the database cannot be read.
       }
@@ -90,7 +103,7 @@ export default function CalendarScreen() {
     return () => {
       alive = false;
     };
-  }, [first, last, selected, dataVersion]);
+  }, [first, last, selected, today, dataVersion]);
 
   const title = new Date(ym.year, ym.month - 1, 1).toLocaleDateString('he-IL', {
     month: 'long',
@@ -152,6 +165,7 @@ export default function CalendarScreen() {
         log={selectedLog}
         onEdit={() => router.push({ pathname: '/checkin', params: { date: selected } })}
       />
+      <CycleHistory cycles={history} />
     </ScrollView>
   );
 }
