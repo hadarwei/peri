@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 
 import type { CycleSummary } from '../../core/history';
 import type { Phase } from '../../core/phase';
@@ -17,35 +17,66 @@ const PHASE_COLOR: Record<Phase, string> = {
 const short = (date: string) =>
   new Date(`${date}T12:00:00`).toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' });
 
-function CycleCard({ cycle }: { cycle: CycleSummary }) {
+function CycleCard({
+  cycle,
+  onEdit,
+  onDelete,
+}: {
+  cycle: CycleSummary;
+  onEdit: (cycle: CycleSummary) => void;
+  onDelete: (cycle: CycleSummary) => void;
+}) {
   const range = cycle.endDate
     ? `${short(cycle.startDate)} - ${short(cycle.endDate)}`
     : `${short(cycle.startDate)} - ${t('history.now')}`;
+  const openMenu = () => {
+    if (cycle.id === undefined) return;
+    Alert.alert(range, undefined, [
+      { text: t('editCycle.editDate'), onPress: () => onEdit(cycle) },
+      {
+        text: t('editCycle.delete'),
+        style: 'destructive',
+        onPress: () =>
+          Alert.alert(t('editCycle.confirmTitle'), t('editCycle.confirmBody'), [
+            { text: t('editCycle.cancel'), style: 'cancel' },
+            {
+              text: t('editCycle.confirmDelete'),
+              style: 'destructive',
+              onPress: () => onDelete(cycle),
+            },
+          ]),
+      },
+      { text: t('editCycle.cancel'), style: 'cancel' },
+    ]);
+  };
+
   return (
-    <Card>
-      <View
-        style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}
-      >
-        <Text style={[type.heading, { color: colors.ink }]}>{range}</Text>
-        <Text style={[type.label, { color: colors.muted }]}>
-          {cycle.open
-            ? tf('history.daysSoFar', { days: cycle.days })
-            : tf('history.days', { days: cycle.days })}
+    <Pressable accessibilityRole="button" onPress={openMenu}>
+      <Card>
+        <View
+          style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}
+        >
+          <Text style={[type.heading, { color: colors.ink }]}>{range}</Text>
+          <Text style={[type.label, { color: colors.muted }]}>
+            {cycle.open
+              ? tf('history.daysSoFar', { days: cycle.days })
+              : tf('history.days', { days: cycle.days })}
+          </Text>
+        </View>
+        <Text style={[type.caption, { color: colors.muted }]}>
+          {cycle.periodDays !== null
+            ? tf('history.period', { days: cycle.periodDays })
+            : t('history.periodUnknown')}
         </Text>
-      </View>
-      <Text style={[type.caption, { color: colors.muted }]}>
-        {cycle.periodDays !== null
-          ? tf('history.period', { days: cycle.periodDays })
-          : t('history.periodUnknown')}
-      </Text>
-      <View
-        style={{ flexDirection: 'row', height: 12, borderRadius: 6, overflow: 'hidden', gap: 1 }}
-      >
-        {PHASE_ORDER.filter((p) => cycle.phaseDays[p] > 0).map((p) => (
-          <View key={p} style={{ flex: cycle.phaseDays[p], backgroundColor: PHASE_COLOR[p] }} />
-        ))}
-      </View>
-    </Card>
+        <View
+          style={{ flexDirection: 'row', height: 12, borderRadius: 6, overflow: 'hidden', gap: 1 }}
+        >
+          {PHASE_ORDER.filter((p) => cycle.phaseDays[p] > 0).map((p) => (
+            <View key={p} style={{ flex: cycle.phaseDays[p], backgroundColor: PHASE_COLOR[p] }} />
+          ))}
+        </View>
+      </Card>
+    </Pressable>
   );
 }
 
@@ -53,9 +84,13 @@ function CycleCard({ cycle }: { cycle: CycleSummary }) {
 export function CycleHistory({
   cycles,
   onAddPrevious,
+  onEdit,
+  onDelete,
 }: {
   cycles: CycleSummary[];
   onAddPrevious: () => void;
+  onEdit: (cycle: CycleSummary) => void;
+  onDelete: (cycle: CycleSummary) => void;
 }) {
   return (
     <View style={{ gap: spacing.md }}>
@@ -65,7 +100,9 @@ export function CycleHistory({
           <Text style={[type.body, { color: colors.muted }]}>{t('history.empty')}</Text>
         </Card>
       ) : (
-        cycles.map((c) => <CycleCard key={c.startDate} cycle={c} />)
+        cycles.map((c) => (
+          <CycleCard key={c.startDate} cycle={c} onEdit={onEdit} onDelete={onDelete} />
+        ))
       )}
       <Pressable
         accessibilityRole="button"

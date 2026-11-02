@@ -3,11 +3,14 @@ import { addDays, diffInDays, parseLocalDate, toLocalDateString } from './dates'
 import type { Phase } from './phase';
 
 export interface CycleInput {
+  id?: number;
   startDate: string;
   endDate: string | null; // null: the latest cycle, still open
 }
 
 export interface CycleSummary {
+  /** Database id, when the cycle comes from the database (needed to edit or delete it). */
+  id?: number;
   startDate: string;
   /** Last day of the cycle; null while it is still open. */
   endDate: string | null;
@@ -57,6 +60,7 @@ export function summarizeCycle(
 
   const flowByDate = new Map(logs.map((l) => [l.date, l.flow]));
   return {
+    id: cycle.id,
     startDate: cycle.startDate,
     endDate: cycle.endDate,
     open,

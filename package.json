@@ -46,7 +46,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "lint": "expo lint",
+    "lint": "expo lint --no-cache",
     "test": "jest && node scripts/test-tz.js",
     "check:privacy": "bash scripts/check-no-network.sh"
   },

@@ -77,3 +77,27 @@ export async function startCycle(
   );
   return fromRow(row as Row);
 }
+
+/** Moves a cycle's start date and re-closes the neighbouring cycles. Returns false if no such id. */
+export async function updateCycleStart(db: Db, id: number, newStart: string): Promise<boolean> {
+  let found = false;
+  await db.withTransactionAsync(async () => {
+    const row = await db.getFirstAsync<{ id: number }>('SELECT id FROM cycles WHERE id = ?', [id]);
+    if (!row) return;
+    found = true;
+    // Ends are derived from the starts, so clear them first: a moved start could otherwise land
+    // after its old end date, which the table does not allow.
+    await db.runAsync('UPDATE cycles SET end_date = NULL');
+    await db.runAsync('UPDATE cycles SET start_date = ? WHERE id = ?', [newStart, id]);
+    await recomputeCycleEnds(db);
+  });
+  return found;
+}
+
+/** Deletes a cycle (its day logs stay) and re-closes the remaining cycles. */
+export async function deleteCycle(db: Db, id: number): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    await db.runAsync('DELETE FROM cycles WHERE id = ?', [id]);
+    await recomputeCycleEnds(db);
+  });
+}

@@ -17,6 +17,16 @@ export const he = {
     fertile: 'חלון פוריות',
     luteal: 'אחרי הביוץ',
   },
+  editCycle: {
+    title: 'עריכת מחזור',
+    subtitle: 'אפשר לשנות את היום הראשון של המחזור.',
+    editDate: 'שינוי תאריך התחלה',
+    delete: 'מחיקת המחזור',
+    cancel: 'ביטול',
+    confirmTitle: 'למחוק את המחזור?',
+    confirmBody: 'הרישומים היומיים נשארים. רק המחזור נמחק, והתחזיות יתעדכנו.',
+    confirmDelete: 'מחיקה',
+  },
   addCycle: {
     open: 'הוספת מחזור קודם',
     title: 'מתי התחיל מחזור קודם?',

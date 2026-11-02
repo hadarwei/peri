@@ -18,8 +18,14 @@ import { toLocalDateString } from '../../src/core/dates';
 import { summarizeCycle, type CycleSummary } from '../../src/core/history';
 import type { Phase } from '../../src/core/phase';
 import { getDb } from '../../src/db';
-import { useDataVersion } from '../../src/db/dataVersion';
-import { getCycles, getDayLog, getDayLogsInRange, type DayLog } from '../../src/db/repos';
+import { notifyDataChanged, useDataVersion } from '../../src/db/dataVersion';
+import {
+  deleteCycle,
+  getCycles,
+  getDayLog,
+  getDayLogsInRange,
+  type DayLog,
+} from '../../src/db/repos';
 import { t } from '../../src/i18n';
 import { colors, MIN_TOUCH, radii, spacing, type } from '../../src/theme';
 
@@ -179,7 +185,22 @@ export default function CalendarScreen() {
         log={selectedLog}
         onEdit={() => router.push({ pathname: '/checkin', params: { date: selected } })}
       />
-      <CycleHistory cycles={history} onAddPrevious={() => router.push('/add-cycle')} />
+      <CycleHistory
+        cycles={history}
+        onAddPrevious={() => router.push('/add-cycle')}
+        onEdit={(c) =>
+          router.push({ pathname: '/add-cycle', params: { id: String(c.id), date: c.startDate } })
+        }
+        onDelete={async (c) => {
+          if (c.id === undefined) return;
+          try {
+            await deleteCycle(await getDb(), c.id);
+            notifyDataChanged();
+          } catch {
+            // The list simply stays as it was.
+          }
+        }}
+      />
     </ScrollView>
   );
 }

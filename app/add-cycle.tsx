@@ -1,5 +1,5 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
@@ -7,7 +7,7 @@ import { addDays, parseLocalDate, toLocalDateString } from '../src/core/dates';
 import { checkImportDate } from '../src/core/importCycle';
 import { getDb } from '../src/db';
 import { notifyDataChanged } from '../src/db/dataVersion';
-import { getCycles, startCycle } from '../src/db/repos';
+import { getCycles, startCycle, updateCycleStart } from '../src/db/repos';
 import { t } from '../src/i18n';
 import { colors, MIN_TOUCH, radii, spacing, type } from '../src/theme';
 
@@ -16,18 +16,30 @@ type Status = 'idle' | 'future' | 'exists' | 'saved' | 'failed';
 /** Adds a previous cycle: only its first day is needed. */
 export default function AddCycleScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ id?: string; date?: string }>();
+  const editId = params.id ? Number(params.id) : null; // set when editing an existing cycle
   const today = toLocalDateString(new Date());
   // Start a month back: the most common case is "my last period".
-  const [date, setDate] = useState(() => toLocalDateString(addDays(parseLocalDate(today), -28)));
+  const [date, setDate] = useState(
+    () => params.date ?? toLocalDateString(addDays(parseLocalDate(today), -28)),
+  );
   const [status, setStatus] = useState<Status>('idle');
 
   const save = async () => {
     try {
       const db = await getDb();
-      const starts = (await getCycles(db)).map((c) => c.startDate);
+      const cycles = await getCycles(db);
+      // When editing, the cycle's own current start date does not count as taken.
+      const starts = cycles.filter((c) => c.id !== editId).map((c) => c.startDate);
       const check = checkImportDate(date, today, starts);
       if (check !== 'ok') {
         setStatus(check);
+        return;
+      }
+      if (editId !== null) {
+        await updateCycleStart(db, editId, date);
+        notifyDataChanged();
+        router.back();
         return;
       }
       await startCycle(db, date, 'imported');
@@ -50,8 +62,12 @@ export default function AddCycleScreen() {
       style={{ flex: 1, backgroundColor: colors.ground }}
       contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
     >
-      <Text style={[type.title, { color: colors.ink }]}>{t('addCycle.title')}</Text>
-      <Text style={[type.body, { color: colors.muted }]}>{t('addCycle.subtitle')}</Text>
+      <Text style={[type.title, { color: colors.ink }]}>
+        {editId !== null ? t('editCycle.title') : t('addCycle.title')}
+      </Text>
+      <Text style={[type.body, { color: colors.muted }]}>
+        {editId !== null ? t('editCycle.subtitle') : t('addCycle.subtitle')}
+      </Text>
 
       <View
         style={{
@@ -140,7 +156,9 @@ export default function AddCycleScreen() {
             onPress={() => router.back()}
             style={{ minHeight: MIN_TOUCH, justifyContent: 'center', alignItems: 'center' }}
           >
-            <Text style={[type.label, { color: colors.muted }]}>{t('addCycle.dontRemember')}</Text>
+            <Text style={[type.label, { color: colors.muted }]}>
+              {editId !== null ? t('editCycle.cancel') : t('addCycle.dontRemember')}
+            </Text>
           </Pressable>
         </View>
       )}
