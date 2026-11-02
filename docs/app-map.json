@@ -69,17 +69,16 @@
         "P3.3 check-in modal (app/checkin.tsx): mood, same as yesterday, top-3 symptom chips (topSymptoms), collapsed more details (flow/pain/energy/note)",
         "P3.4 saving: saveCheckIn (day log + checkins in one transaction), prefill, same-as-yesterday, duck celebrates; Today mood row saves quickly",
         "P3.5 period start card (PeriodStartCard) + startCycle/recomputeCycleEnds (cycles repo) + stand-in prediction src/core/simplePrediction.ts (28 days, replaced in stage 6); \"not yet\" hides until tomorrow via setting period_start_dismissed_on",
-        "P3.6 streak: calculateStreak (src/core/streak.ts), opening Today records a check-in, StreakCard real; src/db/dataVersion.ts (notifyDataChanged/useDataVersion) refreshes screens after saves"
+        "P3.6 streak: calculateStreak (src/core/streak.ts), opening Today records a check-in, StreakCard real; src/db/dataVersion.ts (notifyDataChanged/useDataVersion) refreshes screens after saves",
+        "P3.7 calendar month grid (src/core/calendar.ts: monthGrid, shiftMonth, phaseForCycleDay, dayInfo; MonthGrid component; legend; month nav)",
+        "P3.8 selected-day card (DayDetails) + edit/add any past day via /checkin?date=; back-filling a past day does NOT count for the streak (saveCheckIn countsForStreak)",
+        "P3.9 cycle history list (src/core/history.ts summarizeCycle; CycleHistory component)"
       ],
       "next": [
-        "CHECK 3a/3b (phone): check-in saving, period question (dev seed button on Today), streak",
-        "P3.7 calendar grid",
-        "P3.8 day details/edit past days",
-        "P3.9 cycle history",
-        "CHECK 3c",
-        "P3.10 add previous cycle",
+        "CHECK 3c (phone): calendar + history with the dev seed button (נתוני בדיקה)",
+        "P3.10 add previous cycle (date picker, \"don't remember\")",
         "P3.11 edit/delete cycles",
-        "CHECK 3d + merge"
+        "CHECK 3d + merge stage 3"
       ]
     },
     "4": {
@@ -166,7 +165,9 @@
     "src/db/saveCheckIn.ts": "saves day log + checkin atomically; empty entry records the check-in only",
     "src/db/repos/checkins.ts": "recordCheckin, getCheckinDates",
     "src/db/repos/cycles.ts": "getCycles, getLatestCycle, startCycle (closes previous), recomputeCycleEnds",
-    "src/core/streak.ts": "calculateStreak(dates, today)"
+    "src/core/streak.ts": "calculateStreak(dates, today)",
+    "src/core/calendar.ts": "monthGrid, shiftMonth, phaseForCycleDay(day,len): period 1-5, fertile = ovulation-5..ovulation (ovulation = len-14), luteal after; dayInfo(date,cycles,today)",
+    "src/core/history.ts": "summarizeCycle(cycle, logs, today): days, periodDays (consecutive flow>0 from start, else null), phaseDays"
   },
   "data_model_planned": [
     "cycles",
