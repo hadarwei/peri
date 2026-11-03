@@ -75,7 +75,8 @@
         "P3.9 cycle history list (src/core/history.ts summarizeCycle; CycleHistory component)",
         "P3.10 add previous cycle: /add-cycle modal (date picker, \"לא זוכרת\" just closes, can add several; validation future/exists via checkImportDate; source imported)",
         "P3.11 edit/delete cycles: tap a history card -> action menu -> change start date (same screen in edit mode) or delete with confirmation; updateCycleStart/deleteCycle recompute ends in a transaction (bug found by test: clear ends before moving a start)",
-        "styling: predicted calendar days are grayish with light dashes + legend entry"
+        "styling: predicted calendar days are grayish with light dashes + legend entry",
+        "user feedback round (2026-11-03): vivid real colours + mostly-gray predicted colours shared via src/theme/calendarColors.ts (calendar, legend, Today strip); Today strip + prediction cards now read the latest cycle (src/core/todayCycle.ts) and show a prompt to add a cycle when none; add/edit cycle also sets period length + flow (src/db/periodDays.ts); history cards show a menu icon + hint; dev wipe button asks for confirmation; seed refuses when cycles exist"
       ],
       "next": [
         "CHECK 3d (phone): add/edit/delete cycles, full flow",
@@ -170,7 +171,9 @@
     "src/core/streak.ts": "calculateStreak(dates, today)",
     "src/core/calendar.ts": "monthGrid, shiftMonth, phaseForCycleDay(day,len): period 1-5, fertile = ovulation-5..ovulation (ovulation = len-14), luteal after; dayInfo(date,cycles,today)",
     "src/core/history.ts": "summarizeCycle(cycle, logs, today): days, periodDays (consecutive flow>0 from start, else null), phaseDays",
-    "app/add-cycle.tsx": "add previous cycle / edit a cycle start date (params id, date)"
+    "app/add-cycle.tsx": "add previous cycle / edit a cycle start date (params id, date)",
+    "src/theme/calendarColors.ts": "REAL_PHASE_COLOR (vivid) and predictedPhaseColor (mostly gray) shared by calendar and strip",
+    "src/db/periodDays.ts": "setPeriodDays(db,start,days,flow): writes flow on the first N days, clears extra bleeding days, keeps other fields"
   },
   "data_model_planned": [
     "cycles",
@@ -181,10 +184,7 @@
     "checkins"
   ],
   "open_questions": [
-    "RTL restart behavior in Expo Go",
-    "repo visibility",
-    "backup behavior",
-    "medical content review"
+    "user reported \"delete cycle deletes all history\": per-cycle delete is tested to remove exactly one cycle and keep day logs; suspected the dev wipe button (similar name, no confirm) - awaiting confirmation which button was used; user reported seed button did nothing - added visible feedback, awaiting repro"
   ],
   "lessons": [
     "Jest cannot switch TZ: scripts/test-tz.js runs date tests per zone",
