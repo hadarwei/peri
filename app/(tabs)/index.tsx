@@ -8,6 +8,7 @@ import { CycleStrip } from '../../src/components/CycleStrip';
 import { DidYouKnowCard } from '../../src/components/today/DidYouKnowCard';
 import { MoodRow } from '../../src/components/today/MoodRow';
 import { PredictionCard } from '../../src/components/today/PredictionCard';
+import { TemperatureChart } from '../../src/components/me/TemperatureChart';
 import { StreakCard } from '../../src/components/today/StreakCard';
 import { FACTS } from '../../src/content/facts';
 import { t } from '../../src/i18n';
@@ -20,6 +21,7 @@ import { DEFAULT_RANGE_DAYS, todayCycle, type TodayCycle } from '../../src/core/
 import { getDb } from '../../src/db';
 import { notifyDataChanged, useDataVersion } from '../../src/db/dataVersion';
 import { saveCheckIn } from '../../src/db/saveCheckIn';
+import { loadTrackingSettings } from '../../src/settings/store';
 import {
   countCycles,
   countDayLogs,
@@ -42,6 +44,7 @@ export default function TodayScreen() {
   const [saved, setSaved] = useState<string | null>(null);
   const [streak, setStreak] = useState(0);
   const [cycle, setCycle] = useState<TodayCycle | null>(null); // null: no cycle recorded yet
+  const [showTemperature, setShowTemperature] = useState(false);
   const dataVersion = useDataVersion();
 
   // A friendly cloud when the screen opens (after a short pause so the screen settles first).
@@ -70,13 +73,15 @@ export default function TodayScreen() {
     (async () => {
       try {
         const db = await getDb();
-        const [n, dates, latest] = await Promise.all([
+        const [n, dates, latest, tracking] = await Promise.all([
           countDayLogs(db),
           getCheckinDates(db),
           getLatestCycle(db),
+          loadTrackingSettings(db),
         ]);
         if (!alive) return;
         setCount(n);
+        setShowTemperature(tracking.tempEnabled);
         setCycle(latest ? todayCycle(latest.startDate, toLocalDateString(new Date())) : null);
         setStreak(calculateStreak(dates, toLocalDateString(new Date())));
       } catch (e) {
@@ -223,6 +228,8 @@ export default function TodayScreen() {
         {/* A tap on a face saves today's mood (and counts as a check-in) and the duck celebrates. */}
         <MoodRow onPick={quickMood} />
         <StreakCard days={streak} />
+        {/* The month's temperature, only for people who track it. */}
+        {showTemperature && <TemperatureChart />}
         <DidYouKnowCard fact={FACTS[0]} />
         {/* Dev-only picker for the duck's look (the real state comes from the cycle in stage 6). */}
         {__DEV__ && (

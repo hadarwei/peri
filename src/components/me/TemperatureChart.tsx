@@ -20,12 +20,13 @@ import { Card } from '../Card';
 
 const HEIGHT = 150;
 const LEFT_PAD = 34; // room for the degree labels
+const RIGHT_PAD = 8; // so the last dot is not cut off at the edge
 const UNUSUAL = '#E08A00';
 
 /** The drawing itself (kept separate so it can be previewed without the database). */
 export function ChartDrawing({ model, width }: { model: ChartModel; width: number }) {
   return (
-    <Svg width={width + LEFT_PAD} height={HEIGHT + 20}>
+    <Svg width={width + LEFT_PAD + RIGHT_PAD} height={HEIGHT + 20}>
       {[model.yMin, Math.round(((model.yMin + model.yMax) / 2) * 20) / 20, model.yMax].map((v) => {
         const y = HEIGHT - ((v - model.yMin) / (model.yMax - model.yMin || 1)) * HEIGHT + 4;
         return (
@@ -73,7 +74,7 @@ export function ChartDrawing({ model, width }: { model: ChartModel; width: numbe
 /** Last 30 days of body temperature: a line through normal readings, hollow dots for unusual ones. */
 export function TemperatureChart() {
   const { width: screenWidth } = useWindowDimensions();
-  const width = screenWidth - spacing.lg * 2 - spacing.lg * 2 - LEFT_PAD; // screen - page - card padding
+  const width = screenWidth - spacing.lg * 2 - spacing.lg * 2 - LEFT_PAD - RIGHT_PAD; // screen - page - card padding
   const [model, setModel] = useState<ChartModel | null>(null);
   const dataVersion = useDataVersion();
 
@@ -96,12 +97,14 @@ export function TemperatureChart() {
 
   const summary = model ? summarizeChart(model) : null;
   const description = summary
-    ? tf('tempChart.summary', {
-        count: summary.count,
-        min: formatTemperature(summary.min),
-        max: formatTemperature(summary.max),
-        last: formatTemperature(summary.last.celsius),
-      })
+    ? summary.count === 1
+      ? tf('tempChart.summaryOne', { last: formatTemperature(summary.last.celsius) })
+      : tf('tempChart.summary', {
+          count: summary.count,
+          min: formatTemperature(summary.min),
+          max: formatTemperature(summary.max),
+          last: formatTemperature(summary.last.celsius),
+        })
     : t('tempChart.empty');
 
   return (
