@@ -20,6 +20,7 @@ export function CycleStrip({ dayOfCycle, cycleLength = 28 }: Props) {
   const phase = phaseForCycleDay(dayOfCycle, cycleLength);
   const days = Array.from({ length: cycleLength }, (_, i) => i + 1);
   const markerDay = Math.min(dayOfCycle, cycleLength);
+  // The duck pictures face right, but the days run right to left, so the marker duck is flipped.
 
   return (
     <View
@@ -60,7 +61,7 @@ export function CycleStrip({ dayOfCycle, cycleLength = 28 }: Props) {
                 {day === markerDay && (
                   <Image
                     source={duckFrames.stand}
-                    style={{ width: 18, height: 18 }}
+                    style={{ width: 18, height: 18, transform: [{ scaleX: -1 }] }}
                     resizeMode="contain"
                   />
                 )}

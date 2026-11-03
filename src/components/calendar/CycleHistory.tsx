@@ -31,7 +31,6 @@ function CycleCard({
     ? `${short(cycle.startDate)} - ${short(cycle.endDate)}`
     : `${short(cycle.startDate)} - ${t('history.now')}`;
   const openMenu = () => {
-    if (cycle.id === undefined) return;
     Alert.alert(range, undefined, [
       { text: t('editCycle.editDate'), onPress: () => onEdit(cycle) },
       {

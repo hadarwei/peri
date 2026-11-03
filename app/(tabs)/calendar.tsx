@@ -99,7 +99,11 @@ export default function CalendarScreen() {
         setHistory(
           allCycles
             .map((c) =>
-              summarizeCycle({ startDate: c.startDate, endDate: c.endDate }, allLogs, today),
+              summarizeCycle(
+                { id: c.id, startDate: c.startDate, endDate: c.endDate },
+                allLogs,
+                today,
+              ),
             )
             .reverse(), // newest first
         );
@@ -205,7 +209,6 @@ export default function CalendarScreen() {
           })
         }
         onDelete={async (c) => {
-          if (c.id === undefined) return;
           try {
             await deleteCycle(await getDb(), c.id);
             notifyDataChanged();
