@@ -6,6 +6,9 @@ export interface CheckInDraft {
   pain: number | null; // 0-10
   energy: number | null; // 1-5
   note: string;
+  /** Morning temperature; null until the user presses + or - (so a guess is never saved). */
+  temperature: number | null;
+  temperatureUnusual: boolean;
 }
 
 export const EMPTY_DRAFT: CheckInDraft = {
@@ -15,6 +18,8 @@ export const EMPTY_DRAFT: CheckInDraft = {
   pain: null,
   energy: null,
   note: '',
+  temperature: null,
+  temperatureUnusual: false,
 };
 
 /** Pain is chosen from four levels; these are the values stored for them. */
@@ -39,6 +44,7 @@ interface LogLike {
 /** A draft that starts from an already saved day log. */
 export function draftFromLog(log: LogLike): CheckInDraft {
   return {
+    ...EMPTY_DRAFT,
     mood: log.mood,
     symptoms: [...log.symptoms],
     flow: log.flow,
@@ -60,6 +66,7 @@ export function isDraftEmpty(d: CheckInDraft): boolean {
     d.flow === null &&
     d.pain === null &&
     d.energy === null &&
-    d.note.trim() === ''
+    d.note.trim() === '' &&
+    d.temperature === null
   );
 }

@@ -1,19 +1,15 @@
-import { Text, View } from 'react-native';
+import { ScrollView } from 'react-native';
 
-import { t } from '../../src/i18n';
-import { colors, type } from '../../src/theme';
+import { TrackingCard } from '../../src/components/me/TrackingCard';
+import { colors, spacing } from '../../src/theme';
 
-export default function Screen() {
+export default function MeScreen() {
   return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: colors.ground,
-      }}
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.ground }}
+      contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
     >
-      <Text style={[type.title, { color: colors.ink }]}>{t('tabs.me')}</Text>
-    </View>
+      <TrackingCard />
+    </ScrollView>
   );
 }

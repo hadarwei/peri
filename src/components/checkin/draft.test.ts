@@ -23,13 +23,18 @@ const log = { mood: 4, symptoms: ['a'], flow: 1, pain: 3, energy: 2, note: 'hell
 describe('drafts', () => {
   it('draftFromLog copies everything and does not share the symptoms array', () => {
     const d = draftFromLog(log);
-    expect(d).toEqual(log);
+    expect(d).toEqual({ ...log, temperature: null, temperatureUnusual: false });
     d.symptoms.push('b');
     expect(log.symptoms).toEqual(['a']);
   });
 
   it('same as yesterday copies the feelings but not the note', () => {
-    expect(draftFromYesterday(log)).toEqual({ ...log, note: '' });
+    expect(draftFromYesterday(log)).toEqual({
+      ...log,
+      note: '',
+      temperature: null,
+      temperatureUnusual: false,
+    });
   });
 
   it('an empty draft is empty; any field makes it non-empty; a blank note does not', () => {
@@ -38,5 +43,6 @@ describe('drafts', () => {
     expect(isDraftEmpty({ ...EMPTY_DRAFT, mood: 1 })).toBe(false);
     expect(isDraftEmpty({ ...EMPTY_DRAFT, symptoms: ['x'] })).toBe(false);
     expect(isDraftEmpty({ ...EMPTY_DRAFT, flow: 0 })).toBe(false); // 0 is a real answer
+    expect(isDraftEmpty({ ...EMPTY_DRAFT, temperature: 36.5 })).toBe(false);
   });
 });

@@ -11,6 +11,7 @@ import {
   toggleSymptom,
   type CheckInDraft,
 } from '../src/components/checkin/draft';
+import { TemperatureCard } from '../src/components/checkin/TemperatureCard';
 import { PeriodStartCard } from '../src/components/checkin/PeriodStartCard';
 import { MoreDetails } from '../src/components/checkin/MoreDetails';
 import { Card } from '../src/components/Card';
@@ -28,11 +29,14 @@ import {
   countCycles,
   getDayLog,
   getDayLogsInRange,
+  getLastTemperature,
   getLatestCycle,
   getSetting,
+  getTemperature,
   setSetting,
   startCycle,
   type DayLog,
+  type TemperatureReading,
 } from '../src/db/repos';
 import { t } from '../src/i18n';
 import { he } from '../src/i18n/he';
@@ -43,22 +47,35 @@ interface Loaded {
   symptomChips: string[];
   todayLog: DayLog | null;
   yesterdayLog: DayLog | null;
+  todayTemperature: TemperatureReading | null;
+  lastTemperature: TemperatureReading | null;
 }
 
 /** Loads what the check-in needs from the on-device database. */
 async function load(today: string): Promise<Loaded> {
   const db = await getDb();
   const yesterday = toLocalDateString(addDays(parseLocalDate(today), -1));
-  const [latestCycle, cycles, settings, logs, todayLog, yesterdayLog, dismissedOn] =
-    await Promise.all([
-      getLatestCycle(db),
-      countCycles(db),
-      loadTrackingSettings(db),
-      getDayLogsInRange(db, toLocalDateString(addDays(parseLocalDate(today), -90)), today),
-      getDayLog(db, today),
-      getDayLog(db, yesterday),
-      getSetting(db, 'period_start_dismissed_on'),
-    ]);
+  const [
+    latestCycle,
+    cycles,
+    settings,
+    logs,
+    todayLog,
+    yesterdayLog,
+    dismissedOn,
+    todayTemperature,
+    lastTemperature,
+  ] = await Promise.all([
+    getLatestCycle(db),
+    countCycles(db),
+    loadTrackingSettings(db),
+    getDayLogsInRange(db, toLocalDateString(addDays(parseLocalDate(today), -90)), today),
+    getDayLog(db, today),
+    getDayLog(db, yesterday),
+    getSetting(db, 'period_start_dismissed_on'),
+    getTemperature(db, today),
+    getLastTemperature(db),
+  ]);
   const prediction = latestCycle ? simplePrediction(latestCycle.startDate) : null;
   const cards = getTodayCards({
     today,
@@ -78,6 +95,8 @@ async function load(today: string): Promise<Loaded> {
     symptomChips: topSymptoms(logs, 3, he.checkin.defaultSymptoms),
     todayLog,
     yesterdayLog,
+    todayTemperature,
+    lastTemperature,
   };
 }
 
@@ -104,7 +123,12 @@ export default function CheckInScreen() {
     load(today).then((result) => {
       if (!alive) return;
       setLoaded(result);
-      if (result.todayLog) setDraft(draftFromLog(result.todayLog)); // reopening shows what was saved
+      // Reopening shows what was saved earlier today.
+      setDraft({
+        ...(result.todayLog ? draftFromLog(result.todayLog) : EMPTY_DRAFT),
+        temperature: result.todayTemperature?.celsius ?? null,
+        temperatureUnusual: result.todayTemperature?.unusual ?? false,
+      });
     });
     return () => {
       alive = false;
@@ -116,10 +140,8 @@ export default function CheckInScreen() {
     setSaving(true);
     setFailed(false);
     try {
-      await saveCheckIn(
-        await getDb(),
-        today,
-        {
+      await saveCheckIn(await getDb(), today, {
+        patch: {
           mood: draft.mood,
           symptoms: draft.symptoms,
           flow: draft.flow,
@@ -127,9 +149,13 @@ export default function CheckInScreen() {
           energy: draft.energy,
           note: draft.note,
         },
-        !isDraftEmpty(draft),
-        isRealToday, // back-filling a past day does not extend the streak
-      );
+        hasContent: !isDraftEmpty(draft),
+        countsForStreak: isRealToday, // back-filling a past day does not extend the streak
+        temperature:
+          draft.temperature !== null
+            ? { celsius: draft.temperature, unusual: draft.temperatureUnusual }
+            : null,
+      });
       notifyDataChanged();
       celebrate();
       router.back();
@@ -178,6 +204,17 @@ export default function CheckInScreen() {
             onYes={periodYes}
             onNotYet={periodNotYet}
             onFlow={(flow) => patch({ flow })}
+          />
+        );
+      case 'temperature':
+        return (
+          <TemperatureCard
+            key={card}
+            value={draft.temperature}
+            lastSaved={loaded?.lastTemperature?.celsius ?? null}
+            unusual={draft.temperatureUnusual}
+            onChange={(celsius) => patch({ temperature: celsius })}
+            onUnusual={(temperatureUnusual) => patch({ temperatureUnusual })}
           />
         );
       case 'mood':

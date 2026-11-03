@@ -90,7 +90,11 @@ export default function TodayScreen() {
 
   const quickMood = async (mood: number) => {
     try {
-      await saveCheckIn(await getDb(), toLocalDateString(new Date()), { mood }, true);
+      await saveCheckIn(await getDb(), toLocalDateString(new Date()), {
+        patch: { mood },
+        hasContent: true,
+        countsForStreak: true,
+      });
       notifyDataChanged();
     } catch (e) {
       setError(String(e));

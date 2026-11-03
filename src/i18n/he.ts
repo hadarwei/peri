@@ -85,6 +85,20 @@ export const he = {
     notePlaceholder: 'משהו שחשוב לזכור מהיום',
     defaultSymptoms: ['התכווצויות', 'כאב ראש', 'עייפות', 'נפיחות', 'רגישות בחזה', 'שינויי מצב רוח'],
   },
+  me: {
+    tracking: 'מעקב',
+    tempTracking: 'מעקב טמפרטורת גוף',
+    tempDaily: 'למדוד כל יום, לא רק בחלון הפוריות',
+    testsTracking: 'בדיקות ביוץ (בקרוב)',
+  },
+  temperature: {
+    title: 'טמפרטורת גוף בבוקר',
+    unit: 'מעלות',
+    lower: 'להפחית',
+    raise: 'להעלות',
+    hint: 'לחצי + או − כדי לעדכן',
+    unusual: 'מדידה חריגה: מחלה או אלכוהול',
+  },
   periodStart: {
     title: 'המחזור התחיל?',
     yes: 'כן, התחיל',
