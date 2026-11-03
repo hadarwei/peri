@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Alert, Pressable, Text, View } from 'react-native';
 
 import type { CycleSummary } from '../../core/history';
@@ -56,7 +57,11 @@ function CycleCard({
         <View
           style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}
         >
-          <Text style={[type.heading, { color: colors.ink }]}>{range}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <Text style={[type.heading, { color: colors.ink }]}>{range}</Text>
+            {/* A visible hint that the card can be opened for edit and delete. */}
+            <Ionicons name="ellipsis-horizontal-circle-outline" size={22} color={colors.muted} />
+          </View>
           <Text style={[type.label, { color: colors.muted }]}>
             {cycle.open
               ? tf('history.daysSoFar', { days: cycle.days })
@@ -95,6 +100,9 @@ export function CycleHistory({
   return (
     <View style={{ gap: spacing.md }}>
       <Text style={[type.heading, { color: colors.ink }]}>{t('history.title')}</Text>
+      {cycles.length > 0 && (
+        <Text style={[type.caption, { color: colors.muted }]}>{t('history.hint')}</Text>
+      )}
       {cycles.length === 0 ? (
         <Card>
           <Text style={[type.body, { color: colors.muted }]}>{t('history.empty')}</Text>

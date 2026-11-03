@@ -2,13 +2,8 @@ import { Pressable, Text, View } from 'react-native';
 
 import type { GridCell, CycleSpan } from '../../core/calendar';
 import { dayInfo } from '../../core/calendar';
-import { blend } from '../../core/color';
 import { colors, spacing, type } from '../../theme';
-
-// Predicted days: the phase colour mixed towards a light gray, with thin light dashes.
-export const PREDICTED_GRAY = '#E3E7EC';
-export const PREDICTED_DASH = '#C4CCD6';
-export const PREDICTED_MIX = 0.6;
+import { PREDICTED_DASH, REAL_PHASE_COLOR, predictedPhaseColor } from '../../theme/calendarColors';
 
 const WEEKDAYS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש']; // Sunday first
 
@@ -57,8 +52,8 @@ export function MonthGrid({ weeks, cycles, today, loggedDates, selectedDate, onS
                     justifyContent: 'center',
                     backgroundColor: info.phase
                       ? predicted
-                        ? blend(colors.tint[info.phase], PREDICTED_GRAY, PREDICTED_MIX)
-                        : colors.tint[info.phase]
+                        ? predictedPhaseColor(info.phase)
+                        : REAL_PHASE_COLOR[info.phase]
                       : 'transparent',
                     opacity: cell.inMonth ? 1 : 0.35,
                     borderWidth: isToday || selected ? 2 : predicted ? 1 : 0,

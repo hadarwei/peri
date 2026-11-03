@@ -1,8 +1,9 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 
 import { useDuck } from '../../src/duck/DuckProvider';
+import { Card } from '../../src/components/Card';
 import { CycleStrip } from '../../src/components/CycleStrip';
 import { DidYouKnowCard } from '../../src/components/today/DidYouKnowCard';
 import { MoodRow } from '../../src/components/today/MoodRow';
@@ -15,12 +16,15 @@ import { MEADOW_HEIGHT, MeadowScene } from '../../src/components/MeadowScene';
 import { DUCK_STATES, type DuckState } from '../../src/core/duckState';
 import { addDays, parseLocalDate, toLocalDateString } from '../../src/core/dates';
 import { calculateStreak } from '../../src/core/streak';
+import { DEFAULT_RANGE_DAYS, todayCycle, type TodayCycle } from '../../src/core/todayCycle';
 import { getDb } from '../../src/db';
 import { notifyDataChanged, useDataVersion } from '../../src/db/dataVersion';
 import { saveCheckIn } from '../../src/db/saveCheckIn';
 import {
+  countCycles,
   countDayLogs,
   getCheckinDates,
+  getLatestCycle,
   recordCheckin,
   startCycle,
   upsertDayLog,
@@ -37,6 +41,7 @@ export default function TodayScreen() {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [streak, setStreak] = useState(0);
+  const [cycle, setCycle] = useState<TodayCycle | null>(null); // null: no cycle recorded yet
   const dataVersion = useDataVersion();
 
   // A friendly cloud when the screen opens (after a short pause so the screen settles first).
@@ -65,9 +70,14 @@ export default function TodayScreen() {
     (async () => {
       try {
         const db = await getDb();
-        const [n, dates] = await Promise.all([countDayLogs(db), getCheckinDates(db)]);
+        const [n, dates, latest] = await Promise.all([
+          countDayLogs(db),
+          getCheckinDates(db),
+          getLatestCycle(db),
+        ]);
         if (!alive) return;
         setCount(n);
+        setCycle(latest ? todayCycle(latest.startDate, toLocalDateString(new Date())) : null);
         setStreak(calculateStreak(dates, toLocalDateString(new Date())));
       } catch (e) {
         if (alive) setError(String(e));
@@ -91,6 +101,10 @@ export default function TodayScreen() {
   const seedCycle = async () => {
     try {
       const db = await getDb();
+      if ((await countCycles(db)) > 0) {
+        setSaved(t('dev.seedExists')); // never pile test data on top of existing cycles
+        return;
+      }
       const today = parseLocalDate(toLocalDateString(new Date()));
       const day = (ago: number) => toLocalDateString(addDays(today, -ago));
       // Three cycles of 28 days; the latest started 26 days ago (so the period is expected soon).
@@ -99,23 +113,33 @@ export default function TodayScreen() {
       for (const ago of [80, 78, 70, 55, 52, 40, 30, 27, 25, 24, 20, 10, 5, 2, 1]) {
         await upsertDayLog(db, day(ago), { mood: 3 + (ago % 3) });
       }
-      setSaved(`3 cycles, latest ${day(26)}`);
+      setSaved(t('dev.seedCreated'));
       notifyDataChanged();
     } catch (e) {
       setError(String(e));
     }
   };
 
-  const resetCycles = async () => {
-    try {
-      const db = await getDb();
-      await db.runAsync('DELETE FROM cycles');
-      await db.runAsync('DELETE FROM day_logs');
-      setSaved('cycles deleted');
-      notifyDataChanged();
-    } catch (e) {
-      setError(String(e));
-    }
+  const resetCycles = () => {
+    // Wipes everything: ask first, so it is never done by accident.
+    Alert.alert(t('dev.resetCycles'), t('dev.resetConfirm'), [
+      { text: t('editCycle.cancel'), style: 'cancel' },
+      {
+        text: t('editCycle.confirmDelete'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const db = await getDb();
+            await db.runAsync('DELETE FROM cycles');
+            await db.runAsync('DELETE FROM day_logs');
+            setSaved(t('dev.resetDone'));
+            notifyDataChanged();
+          } catch (e) {
+            setError(String(e));
+          }
+        },
+      },
+    ]);
   };
 
   const addTestLog = async () => {
@@ -152,24 +176,46 @@ export default function TodayScreen() {
         >
           <Text style={[type.heading, { color: '#FFFFFF' }]}>{t('checkin.open')}</Text>
         </Pressable>
-        {/* Static sample data until stage 6 computes the real cycle (day 12 of 28). */}
-        <CycleStrip dayOfCycle={12} />
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          <PredictionCard
-            title={t('predictions.nextPeriod')}
-            daysExpected={16}
-            daysFrom={14}
-            daysTo={18}
-            accent={colors.period}
-          />
-          <PredictionCard
-            title={t('predictions.ovulation')}
-            daysExpected={2}
-            daysFrom={1}
-            daysTo={4}
-            accent={colors.fertile}
-          />
-        </View>
+        {cycle ? (
+          <>
+            {/* Stand-in prediction (28 days from the last start) until stage 6. */}
+            <CycleStrip dayOfCycle={cycle.dayOfCycle} />
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <PredictionCard
+                title={t('predictions.nextPeriod')}
+                daysExpected={cycle.daysToPeriod}
+                passedMeans="late"
+                rangeDays={DEFAULT_RANGE_DAYS}
+                accent={colors.period}
+              />
+              <PredictionCard
+                title={t('predictions.ovulation')}
+                daysExpected={cycle.daysToOvulation}
+                passedMeans="passed"
+                rangeDays={DEFAULT_RANGE_DAYS}
+                accent={colors.fertile}
+              />
+            </View>
+          </>
+        ) : (
+          <Card>
+            <Text style={[type.heading, { color: colors.ink }]}>{t('today.noCycle')}</Text>
+            <Text style={[type.body, { color: colors.muted }]}>{t('today.noCycleBody')}</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push('/add-cycle')}
+              style={{
+                minHeight: MIN_TOUCH,
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderRadius: radii.pill,
+                backgroundColor: colors.primary,
+              }}
+            >
+              <Text style={[type.label, { color: '#FFFFFF' }]}>{t('addCycle.open')}</Text>
+            </Pressable>
+          </Card>
+        )}
         {/* A tap on a face saves today's mood (and counts as a check-in) and the duck celebrates. */}
         <MoodRow onPick={quickMood} />
         <StreakCard days={streak} />
@@ -229,12 +275,10 @@ export default function TodayScreen() {
               onPress={resetCycles}
               style={{ minHeight: MIN_TOUCH, justifyContent: 'center' }}
             >
-              <Text style={[type.label, { color: colors.muted }]}>{t('dev.resetCycles')}</Text>
+              <Text style={[type.label, { color: '#B00020' }]}>{t('dev.resetCycles')}</Text>
             </Pressable>
             {saved && (
-              <Text style={[type.caption, { color: colors.muted }]}>
-                {`${t('dev.saved')}: ${saved}`}
-              </Text>
+              <Text style={[type.label, { color: colors.ink, textAlign: 'center' }]}>{saved}</Text>
             )}
             {error && (
               <Text style={[type.caption, { color: '#B00020' }]}>

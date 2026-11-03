@@ -6,7 +6,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Card } from '../../src/components/Card';
 import { DayDetails } from '../../src/components/calendar/DayDetails';
 import { CycleHistory } from '../../src/components/calendar/CycleHistory';
-import { MonthGrid, PREDICTED_DASH, PREDICTED_GRAY } from '../../src/components/calendar/MonthGrid';
+import { MonthGrid } from '../../src/components/calendar/MonthGrid';
 import {
   dayInfo,
   monthGrid,
@@ -28,6 +28,7 @@ import {
 } from '../../src/db/repos';
 import { t } from '../../src/i18n';
 import { colors, MIN_TOUCH, radii, spacing, type } from '../../src/theme';
+import { PREDICTED_DASH, PREDICTED_SWATCH, REAL_PHASE_COLOR } from '../../src/theme/calendarColors';
 
 const PHASES: Phase[] = ['period', 'follicular', 'fertile', 'luteal'];
 
@@ -157,7 +158,12 @@ export default function CalendarScreen() {
           {PHASES.map((p) => (
             <View key={p} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
               <View
-                style={{ width: 12, height: 12, borderRadius: 4, backgroundColor: colors.tint[p] }}
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: 4,
+                  backgroundColor: REAL_PHASE_COLOR[p],
+                }}
               />
               <Text style={[type.caption, { color: colors.muted }]}>{t(`phase.${p}`)}</Text>
             </View>
@@ -168,7 +174,7 @@ export default function CalendarScreen() {
                 width: 12,
                 height: 12,
                 borderRadius: 4,
-                backgroundColor: PREDICTED_GRAY,
+                backgroundColor: PREDICTED_SWATCH,
                 borderWidth: 1,
                 borderStyle: 'dashed',
                 borderColor: PREDICTED_DASH,
@@ -189,7 +195,14 @@ export default function CalendarScreen() {
         cycles={history}
         onAddPrevious={() => router.push('/add-cycle')}
         onEdit={(c) =>
-          router.push({ pathname: '/add-cycle', params: { id: String(c.id), date: c.startDate } })
+          router.push({
+            pathname: '/add-cycle',
+            params: {
+              id: String(c.id),
+              date: c.startDate,
+              ...(c.periodDays !== null ? { periodDays: String(c.periodDays) } : {}),
+            },
+          })
         }
         onDelete={async (c) => {
           if (c.id === undefined) return;

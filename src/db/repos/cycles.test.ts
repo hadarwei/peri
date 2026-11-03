@@ -88,6 +88,18 @@ describe('cycles repo', () => {
       ]);
     });
 
+    it('deleting one cycle leaves the other cycles and every day log alone', async () => {
+      const db = await seed();
+      await db.runAsync(
+        "INSERT INTO day_logs (date, mood, updated_at) VALUES ('2026-09-15', 3, 'x')",
+      );
+      const [first, second, third] = await getCycles(db);
+      await deleteCycle(db, second.id);
+      expect((await getCycles(db)).map((c) => c.id)).toEqual([first.id, third.id]);
+      const logs = await db.getAllAsync('SELECT date FROM day_logs');
+      expect(logs).toHaveLength(1);
+    });
+
     it('deleting the only cycle leaves none', async () => {
       const db = await createTestDb();
       const c = await startCycle(db, '2026-09-01');
