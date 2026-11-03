@@ -22,12 +22,12 @@ import { topSymptoms } from '../src/core/topSymptoms';
 import { getDb } from '../src/db';
 import { notifyDataChanged } from '../src/db/dataVersion';
 import { saveCheckIn } from '../src/db/saveCheckIn';
+import { loadTrackingSettings } from '../src/settings/store';
 import { useDuck } from '../src/duck/DuckProvider';
 import {
   countCycles,
   getDayLog,
   getDayLogsInRange,
-  getFlag,
   getLatestCycle,
   getSetting,
   setSetting,
@@ -49,29 +49,16 @@ interface Loaded {
 async function load(today: string): Promise<Loaded> {
   const db = await getDb();
   const yesterday = toLocalDateString(addDays(parseLocalDate(today), -1));
-  const [
-    latestCycle,
-    cycles,
-    temperatureEnabled,
-    temperatureDaily,
-    testsEnabled,
-    pregnancyMode,
-    logs,
-    todayLog,
-    yesterdayLog,
-    dismissedOn,
-  ] = await Promise.all([
-    getLatestCycle(db),
-    countCycles(db),
-    getFlag(db, 'temperature_enabled'),
-    getFlag(db, 'temperature_daily'),
-    getFlag(db, 'tests_enabled'),
-    getFlag(db, 'pregnancy_mode'),
-    getDayLogsInRange(db, toLocalDateString(addDays(parseLocalDate(today), -90)), today),
-    getDayLog(db, today),
-    getDayLog(db, yesterday),
-    getSetting(db, 'period_start_dismissed_on'),
-  ]);
+  const [latestCycle, cycles, settings, logs, todayLog, yesterdayLog, dismissedOn] =
+    await Promise.all([
+      getLatestCycle(db),
+      countCycles(db),
+      loadTrackingSettings(db),
+      getDayLogsInRange(db, toLocalDateString(addDays(parseLocalDate(today), -90)), today),
+      getDayLog(db, today),
+      getDayLog(db, yesterday),
+      getSetting(db, 'period_start_dismissed_on'),
+    ]);
   const prediction = latestCycle ? simplePrediction(latestCycle.startDate) : null;
   const cards = getTodayCards({
     today,
@@ -81,10 +68,10 @@ async function load(today: string): Promise<Loaded> {
     // "Not yet" hides the question for the rest of today.
     periodStartMarked: dismissedOn === today,
     fertileWindow: prediction?.fertileWindow ?? null,
-    temperatureEnabled,
-    temperatureDaily,
-    testsEnabled,
-    pregnancyMode,
+    temperatureEnabled: settings.tempEnabled,
+    temperatureDaily: settings.tempDaily,
+    testsEnabled: settings.testsEnabled,
+    pregnancyMode: settings.pregnancyMode,
   });
   return {
     cards,
