@@ -1,8 +1,9 @@
-import { TEMPERATURE_INFO, TESTS_INFO } from './trackingInfo';
+import { TEMPERATURE_HOWTO, TEMPERATURE_INFO, TESTS_INFO } from './trackingInfo';
 
 describe('tracking explanations', () => {
   it('stay marked as not medically reviewed until someone approves them', () => {
     expect(TEMPERATURE_INFO.reviewed).toBe(false);
+    expect(TEMPERATURE_HOWTO.reviewed).toBe(false);
     expect(TESTS_INFO.reviewed).toBe(false);
   });
 
@@ -12,7 +13,7 @@ describe('tracking explanations', () => {
   });
 
   it('each ready-made question asks for sources, for honesty about doubt, and forbids invented ones', () => {
-    for (const info of [TEMPERATURE_INFO, TESTS_INFO]) {
+    for (const info of [TEMPERATURE_INFO, TESTS_INFO, TEMPERATURE_HOWTO]) {
       expect(info.deeperPrompt).toContain('מקורות');
       expect(info.deeperPrompt).toContain('לא בטוחה');
       expect(info.deeperPrompt).toContain('אל תמציאי');

@@ -88,7 +88,8 @@
         "P4.1 typed tracking settings (src/settings/tracking.ts, store.ts; keys incl. reminder_time/window/enabled, temp_reminders_ignored_count)",
         "P4.2 temperature entry: stepTemperature (0.05, no float drift), temperature repo, TemperatureCard in check-in (value saved only after the user presses +/-), saveCheckIn now takes an options object incl. temperature; Me tab has tracking switches (TrackingCard)",
         "P4.3 temperature chart (30 days) on Me tab: line through normal readings, hollow orange dots for unusual, empty state, text alternative (src/core/tempChart.ts, TemperatureChart.tsx)",
-        "user request 2026-11-03: \"למה כדאי?\" explanations under tracking switches (src/content/trackingInfo.ts, reviewed:false, InfoPanel) + temperature chart on Today (shown when temperature tracking is on)"
+        "user request 2026-11-03: \"למה כדאי?\" explanations under tracking switches (src/content/trackingInfo.ts, reviewed:false, InfoPanel) + temperature chart on Today (shown when temperature tracking is on)",
+        "user request: info button next to the chart title opens TEMPERATURE_HOWTO (how and when to measure; reviewed:false, listed for medical review)"
       ],
       "next": [
         "CHECK 4a (phone): enable temperature tracking in Me, log temperatures in the check-in, verify the chart",

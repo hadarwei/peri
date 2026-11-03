@@ -1,5 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Text, View, useWindowDimensions } from 'react-native';
+import { Pressable, Text, View, useWindowDimensions } from 'react-native';
 import Svg, { Circle, G, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { addDays, parseLocalDate, toLocalDateString } from '../../core/dates';
@@ -15,8 +16,10 @@ import { getDb } from '../../db';
 import { useDataVersion } from '../../db/dataVersion';
 import { getTemperaturesInRange } from '../../db/repos';
 import { t, tf } from '../../i18n';
-import { colors, spacing, type } from '../../theme';
+import { colors, MIN_TOUCH, spacing, type } from '../../theme';
+import { TEMPERATURE_HOWTO } from '../../content/trackingInfo';
 import { Card } from '../Card';
+import { InfoPanel } from './InfoPanel';
 
 const HEIGHT = 150;
 const LEFT_PAD = 34; // room for the degree labels
@@ -76,6 +79,7 @@ export function TemperatureChart() {
   const { width: screenWidth } = useWindowDimensions();
   const width = screenWidth - spacing.lg * 2 - spacing.lg * 2 - LEFT_PAD - RIGHT_PAD; // screen - page - card padding
   const [model, setModel] = useState<ChartModel | null>(null);
+  const [howOpen, setHowOpen] = useState(false);
   const dataVersion = useDataVersion();
 
   useEffect(() => {
@@ -109,7 +113,29 @@ export function TemperatureChart() {
 
   return (
     <Card>
-      <Text style={[type.heading, { color: colors.ink }]}>{t('tempChart.title')}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={[type.heading, { color: colors.ink, flex: 1 }]}>{t('tempChart.title')}</Text>
+        {/* Opens a short guide on how and when to take the temperature. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('tempChart.how')}
+          accessibilityState={{ expanded: howOpen }}
+          onPress={() => setHowOpen((v) => !v)}
+          style={{
+            width: MIN_TOUCH,
+            height: MIN_TOUCH,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Ionicons
+            name={howOpen ? 'information-circle' : 'information-circle-outline'}
+            size={26}
+            color={colors.primary}
+          />
+        </Pressable>
+      </View>
+      {howOpen && <InfoPanel info={TEMPERATURE_HOWTO} />}
       {!model || !model.hasData ? (
         <Text style={[type.body, { color: colors.muted }]}>{t('tempChart.empty')}</Text>
       ) : (
