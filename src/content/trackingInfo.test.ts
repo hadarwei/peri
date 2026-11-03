@@ -10,4 +10,19 @@ describe('tracking explanations', () => {
     expect(TEMPERATURE_INFO.limits.length).toBeGreaterThan(0);
     expect(TESTS_INFO.limits.length).toBeGreaterThan(0);
   });
+
+  it('each ready-made question asks for sources, for honesty about doubt, and forbids invented ones', () => {
+    for (const info of [TEMPERATURE_INFO, TESTS_INFO]) {
+      expect(info.deeperPrompt).toContain('מקורות');
+      expect(info.deeperPrompt).toContain('לא בטוחה');
+      expect(info.deeperPrompt).toContain('אל תמציאי');
+    }
+  });
+
+  it('explanations stay short: at most two benefits and three limits', () => {
+    for (const info of [TEMPERATURE_INFO, TESTS_INFO]) {
+      expect(info.benefits.length).toBeLessThanOrEqual(2);
+      expect(info.limits.length).toBeLessThanOrEqual(3);
+    }
+  });
 });

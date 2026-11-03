@@ -73,6 +73,9 @@ export function TemperatureCard({ value, lastSaved, unusual, onChange, onUnusual
         </View>
         <StepButton symbol="+" label={t('temperature.raise')} onPress={() => step(1)} />
       </View>
+      <Text style={[type.caption, { color: colors.muted }]}>
+        {t('temperature.beforeGettingUp')}
+      </Text>
       <View style={{ minHeight: MIN_TOUCH, justifyContent: 'center', alignItems: 'flex-start' }}>
         <Chip
           label={t('temperature.unusual')}
@@ -80,6 +83,7 @@ export function TemperatureCard({ value, lastSaved, unusual, onChange, onUnusual
           onPress={() => onUnusual(!unusual)}
         />
       </View>
+      <Text style={[type.caption, { color: colors.muted }]}>{t('temperature.unusualHint')}</Text>
     </Card>
   );
 }
