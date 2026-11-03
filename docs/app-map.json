@@ -87,7 +87,8 @@
       "done": [
         "P4.1 typed tracking settings (src/settings/tracking.ts, store.ts; keys incl. reminder_time/window/enabled, temp_reminders_ignored_count)",
         "P4.2 temperature entry: stepTemperature (0.05, no float drift), temperature repo, TemperatureCard in check-in (value saved only after the user presses +/-), saveCheckIn now takes an options object incl. temperature; Me tab has tracking switches (TrackingCard)",
-        "P4.3 temperature chart (30 days) on Me tab: line through normal readings, hollow orange dots for unusual, empty state, text alternative (src/core/tempChart.ts, TemperatureChart.tsx)"
+        "P4.3 temperature chart (30 days) on Me tab: line through normal readings, hollow orange dots for unusual, empty state, text alternative (src/core/tempChart.ts, TemperatureChart.tsx)",
+        "user request 2026-11-03: \"למה כדאי?\" explanations under tracking switches (src/content/trackingInfo.ts, reviewed:false, InfoPanel) + temperature chart on Today (shown when temperature tracking is on)"
       ],
       "next": [
         "CHECK 4a (phone): enable temperature tracking in Me, log temperatures in the check-in, verify the chart",
@@ -220,5 +221,9 @@
       "what": "store each prediction as shown (predicted start, range, made_on, algorithm version); when the real period start is logged keep the error in days; use for an accuracy insight and the late state; local only, included in export and delete-all",
       "why_not_earlier": "stage 3 uses a stand-in 28-day prediction that should not be stored"
     }
+  ],
+  "content_to_review_medically": [
+    "src/content/facts.ts (did you know)",
+    "src/content/trackingInfo.ts (temperature and LH test explanations)"
   ]
 }
