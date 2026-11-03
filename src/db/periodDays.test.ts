@@ -39,7 +39,7 @@ describe('setPeriodDays', () => {
     await setPeriodDays(db, '2026-10-01', 5);
     const logs = await getDayLogsInRange(db, '2026-10-01', '2026-10-28');
     const s = summarizeCycle(
-      { startDate: '2026-10-01', endDate: '2026-10-28' },
+      { id: 1, startDate: '2026-10-01', endDate: '2026-10-28' },
       logs,
       '2026-11-03',
     );
