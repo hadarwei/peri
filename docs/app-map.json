@@ -83,7 +83,19 @@
     },
     "4": {
       "name": "temperature and reminders",
-      "status": "next"
+      "status": "in_progress",
+      "done": [
+        "P4.1 typed tracking settings (src/settings/tracking.ts, store.ts; keys incl. reminder_time/window/enabled, temp_reminders_ignored_count)",
+        "P4.2 temperature entry: stepTemperature (0.05, no float drift), temperature repo, TemperatureCard in check-in (value saved only after the user presses +/-), saveCheckIn now takes an options object incl. temperature; Me tab has tracking switches (TrackingCard)",
+        "P4.3 temperature chart (30 days) on Me tab: line through normal readings, hollow orange dots for unusual, empty state, text alternative (src/core/tempChart.ts, TemperatureChart.tsx)"
+      ],
+      "next": [
+        "CHECK 4a (phone): enable temperature tracking in Me, log temperatures in the check-in, verify the chart",
+        "P4.4 notification permission flow",
+        "P4.5 planReminders (tests first)",
+        "P4.6 schedule reminders (verify iOS 64 pending limit in docs)",
+        "CHECK 4b + merge"
+      ]
     },
     "5": {
       "name": "fertility test photos",
@@ -170,7 +182,10 @@
     "src/core/history.ts": "summarizeCycle(cycle, logs, today): days, periodDays (consecutive flow>0 from start, else null), phaseDays",
     "app/add-cycle.tsx": "add previous cycle / edit a cycle start date (params id, date)",
     "src/theme/calendarColors.ts": "REAL_PHASE_COLOR (vivid) and predictedPhaseColor (mostly gray) shared by calendar and strip",
-    "src/db/periodDays.ts": "setPeriodDays(db,start,days,flow): writes flow on the first N days, clears extra bleeding days, keeps other fields"
+    "src/db/periodDays.ts": "setPeriodDays(db,start,days,flow): writes flow on the first N days, clears extra bleeding days, keeps other fields",
+    "src/settings": "tracking.ts (types/defaults/parsing), store.ts (load/save via settings repo)",
+    "src/db/repos/temperature.ts": "upsertTemperature, getTemperature, getLastTemperature, getTemperaturesInRange, getTemperatureDates",
+    "src/components/me": "TrackingCard (switches), TemperatureChart (+ ChartDrawing)"
   },
   "data_model_planned": [
     "cycles",
