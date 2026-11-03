@@ -37,7 +37,10 @@ export default function RootLayout() {
     <View style={{ flex: 1, direction: 'rtl' }}>
       <StatusBar style="dark" />
       <DuckProvider>
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="checkin" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="add-cycle" options={{ presentation: 'modal' }} />
+        </Stack>
       </DuckProvider>
     </View>
   );

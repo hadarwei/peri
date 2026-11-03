@@ -63,7 +63,26 @@
     },
     "3": {
       "name": "daily log, calendar, history",
-      "status": "next"
+      "status": "in_progress",
+      "done": [
+        "P3.1/3.2 getTodayCards (src/core/todayCards.ts) tests first, 19 cases",
+        "P3.3 check-in modal (app/checkin.tsx): mood, same as yesterday, top-3 symptom chips (topSymptoms), collapsed more details (flow/pain/energy/note)",
+        "P3.4 saving: saveCheckIn (day log + checkins in one transaction), prefill, same-as-yesterday, duck celebrates; Today mood row saves quickly",
+        "P3.5 period start card (PeriodStartCard) + startCycle/recomputeCycleEnds (cycles repo) + stand-in prediction src/core/simplePrediction.ts (28 days, replaced in stage 6); \"not yet\" hides until tomorrow via setting period_start_dismissed_on",
+        "P3.6 streak: calculateStreak (src/core/streak.ts), opening Today records a check-in, StreakCard real; src/db/dataVersion.ts (notifyDataChanged/useDataVersion) refreshes screens after saves",
+        "P3.7 calendar month grid (src/core/calendar.ts: monthGrid, shiftMonth, phaseForCycleDay, dayInfo; MonthGrid component; legend; month nav)",
+        "P3.8 selected-day card (DayDetails) + edit/add any past day via /checkin?date=; back-filling a past day does NOT count for the streak (saveCheckIn countsForStreak)",
+        "P3.9 cycle history list (src/core/history.ts summarizeCycle; CycleHistory component)",
+        "P3.10 add previous cycle: /add-cycle modal (date picker, \"לא זוכרת\" just closes, can add several; validation future/exists via checkImportDate; source imported)",
+        "P3.11 edit/delete cycles: tap a history card -> action menu -> change start date (same screen in edit mode) or delete with confirmation; updateCycleStart/deleteCycle recompute ends in a transaction (bug found by test: clear ends before moving a start)",
+        "styling: predicted calendar days are grayish with light dashes + legend entry",
+        "user feedback round (2026-11-03): vivid real colours + mostly-gray predicted colours shared via src/theme/calendarColors.ts (calendar, legend, Today strip); Today strip + prediction cards now read the latest cycle (src/core/todayCycle.ts) and show a prompt to add a cycle when none; add/edit cycle also sets period length + flow (src/db/periodDays.ts); history cards show a menu icon + hint; dev wipe button asks for confirmation; seed refuses when cycles exist"
+      ],
+      "next": [
+        "CHECK 3d (phone): add/edit/delete cycles, full flow",
+        "merge stage/3-log-calendar into main, tag stage-3-done",
+        "then stage 4 temperature + reminders"
+      ]
     },
     "4": {
       "name": "temperature and reminders",
@@ -143,7 +162,18 @@
     "src/duck/anchors.ts": "measured head/back anchor per frame, REST_SCALE=0.5",
     "src/core/duckState.ts": "DUCK_STATES list/type",
     "src/components/today": "PredictionCard, MoodRow, StreakCard, DidYouKnowCard",
-    "src/content/facts.ts": "did-you-know sample; reviewed:false until a medical professional approves"
+    "src/content/facts.ts": "did-you-know sample; reviewed:false until a medical professional approves",
+    "app/checkin.tsx": "daily check-in modal opened from Today button (route /checkin)",
+    "src/core/todayCards.ts": "getTodayCards(input) -> ordered card list; decisions: pregnancy mode also hides the period-start card; no history => minimal set even if daily temperature is on",
+    "src/db/saveCheckIn.ts": "saves day log + checkin atomically; empty entry records the check-in only",
+    "src/db/repos/checkins.ts": "recordCheckin, getCheckinDates",
+    "src/db/repos/cycles.ts": "getCycles, getLatestCycle, startCycle, updateCycleStart, deleteCycle, recomputeCycleEnds",
+    "src/core/streak.ts": "calculateStreak(dates, today)",
+    "src/core/calendar.ts": "monthGrid, shiftMonth, phaseForCycleDay(day,len): period 1-5, fertile = ovulation-5..ovulation (ovulation = len-14), luteal after; dayInfo(date,cycles,today)",
+    "src/core/history.ts": "summarizeCycle(cycle, logs, today): days, periodDays (consecutive flow>0 from start, else null), phaseDays",
+    "app/add-cycle.tsx": "add previous cycle / edit a cycle start date (params id, date)",
+    "src/theme/calendarColors.ts": "REAL_PHASE_COLOR (vivid) and predictedPhaseColor (mostly gray) shared by calendar and strip",
+    "src/db/periodDays.ts": "setPeriodDays(db,start,days,flow): writes flow on the first N days, clears extra bleeding days, keeps other fields"
   },
   "data_model_planned": [
     "cycles",
@@ -154,21 +184,32 @@
     "checkins"
   ],
   "open_questions": [
-    "RTL restart behavior in Expo Go",
-    "repo visibility",
-    "backup behavior",
-    "medical content review"
+    "user reported \"delete cycle deletes all history\": per-cycle delete is tested to remove exactly one cycle and keep day logs; suspected the dev wipe button (similar name, no confirm) - awaiting confirmation which button was used; user reported seed button did nothing - added visible feedback, awaiting repro"
   ],
   "lessons": [
     "Jest cannot switch TZ: scripts/test-tz.js runs date tests per zone",
     "Only plain numbers and worklet-marked functions on the UI thread; imported helper functions crashed Expo Go",
     "RN Image sizes: give explicit width/height, absoluteFill ignored the box",
     "Use pageX/pageY (not locationX/Y) for tap coordinates",
-    "Verify visual overlays without a phone: server-render the real components with a react-native-svg shim (esbuild + react-dom/server) over the PNG frames and screenshot with Playwright (/tmp/rend)"
+    "Verify visual overlays without a phone: server-render the real components with a react-native-svg shim (esbuild + react-dom/server) over the PNG frames and screenshot with Playwright (/tmp/rend)",
+    "expo lint caches results; npm run lint now uses --no-cache"
   ],
   "open_for_user": [
     "phone check of all duck states, glows, full Today screen (merged on user request \"lets move on\")",
     "send back edited overlay PNGs if any",
     "did-you-know text is unreviewed"
+  ],
+  "decisions_to_confirm": [
+    "no history => no temperature/LH/period-start card even when user chose daily temperature (spec literal)",
+    "pregnancy mode hides period-start card too (spec only says fertility cards)"
+  ],
+  "proposals": [
+    {
+      "id": "prediction-history",
+      "status": "proposed, awaiting user decision",
+      "where": "stage 6 right after the prediction engine (new migration 002 predictions table)",
+      "what": "store each prediction as shown (predicted start, range, made_on, algorithm version); when the real period start is logged keep the error in days; use for an accuracy insight and the late state; local only, included in export and delete-all",
+      "why_not_earlier": "stage 3 uses a stand-in 28-day prediction that should not be stored"
+    }
   ]
 }

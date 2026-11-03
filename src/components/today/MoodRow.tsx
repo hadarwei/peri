@@ -1,16 +1,23 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
+import { MOOD_FACES as FACES } from '../../content/moodFaces';
 import { t } from '../../i18n';
 import { he } from '../../i18n/he';
 import { colors, MIN_TOUCH, radii, spacing, type } from '../../theme';
 import { Card } from '../Card';
 
-const FACES = ['😣', '😕', '🙂', '😊', '🤩'];
-
 /** Skippable mood question. Tapping a face reports it; saving comes in the next stage. */
-export function MoodRow({ onPick }: { onPick: (mood: number) => void }) {
-  const [picked, setPicked] = useState<number | null>(null);
+export function MoodRow({
+  onPick,
+  value,
+}: {
+  onPick: (mood: number) => void;
+  /** When given, the row is controlled by the parent; otherwise it remembers the last tap. */
+  value?: number | null;
+}) {
+  const [tapped, setTapped] = useState<number | null>(null);
+  const picked = value !== undefined ? value : tapped;
   return (
     <Card>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
@@ -24,7 +31,7 @@ export function MoodRow({ onPick }: { onPick: (mood: number) => void }) {
             accessibilityRole="button"
             accessibilityLabel={he.mood.faces[i]}
             onPress={() => {
-              setPicked(i + 1);
+              setTapped(i + 1);
               onPick(i + 1);
             }}
             style={{

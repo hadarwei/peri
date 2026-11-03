@@ -1,26 +1,26 @@
 import { Image, Text, View } from 'react-native';
 
 import { duckFrames } from '../assets/duckFrames';
-import { phaseForDay, type Phase } from '../core/phase';
+import { phaseForCycleDay } from '../core/calendar';
 import { t, tf } from '../i18n';
 import { colors, radii, spacing, type } from '../theme';
+import { REAL_PHASE_COLOR, predictedPhaseColor } from '../theme/calendarColors';
 
 interface Props {
-  dayOfCycle: number; // 1-based
+  /** Today's day in the cycle, 1-based. Past 28 the strip stays full and the title says the day. */
+  dayOfCycle: number;
   cycleLength?: number;
 }
 
-const PHASE_COLOR: Record<Phase, string> = {
-  period: colors.period,
-  follicular: colors.follicular,
-  fertile: colors.fertile,
-  luteal: colors.luteal,
-};
-
-/** Card with one rounded segment per cycle day, colored by phase, today marked by a duck head. */
+/**
+ * One rounded segment per day of the cycle. Days up to today are vivid (they happened), days after
+ * today are gray (they are predictions). Today is outlined and carries the duck's head.
+ */
 export function CycleStrip({ dayOfCycle, cycleLength = 28 }: Props) {
-  const phase = phaseForDay(dayOfCycle);
+  const phase = phaseForCycleDay(dayOfCycle, cycleLength);
   const days = Array.from({ length: cycleLength }, (_, i) => i + 1);
+  const markerDay = Math.min(dayOfCycle, cycleLength);
+  // The duck pictures face right, but the days run right to left, so the marker duck is flipped.
 
   return (
     <View
@@ -35,14 +35,16 @@ export function CycleStrip({ dayOfCycle, cycleLength = 28 }: Props) {
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text style={[type.heading, { color: colors.ink }]}>
-          {tf('today.dayOfCycle', { day: dayOfCycle, length: cycleLength })}
+          {dayOfCycle <= cycleLength
+            ? tf('today.dayOfCycle', { day: dayOfCycle, length: cycleLength })
+            : tf('today.dayLate', { day: dayOfCycle })}
         </Text>
         <View
           style={{
             paddingHorizontal: spacing.md,
             paddingVertical: spacing.xs,
             borderRadius: radii.pill,
-            backgroundColor: PHASE_COLOR[phase],
+            backgroundColor: REAL_PHASE_COLOR[phase],
           }}
         >
           <Text style={[type.label, { color: colors.ink }]}>{t(`phase.${phase}`)}</Text>
@@ -50,29 +52,35 @@ export function CycleStrip({ dayOfCycle, cycleLength = 28 }: Props) {
       </View>
 
       <View style={{ flexDirection: 'row', gap: 2 }}>
-        {days.map((day) => (
-          <View key={day} style={{ flex: 1, alignItems: 'center', gap: 2 }}>
-            <View style={{ height: 18, justifyContent: 'flex-end' }}>
-              {day === dayOfCycle && (
-                <Image
-                  source={duckFrames.stand}
-                  style={{ width: 18, height: 18 }}
-                  resizeMode="contain"
-                />
-              )}
+        {days.map((day) => {
+          const dayPhase = phaseForCycleDay(day, cycleLength);
+          const future = day > dayOfCycle;
+          return (
+            <View key={day} style={{ flex: 1, alignItems: 'center', gap: 2 }}>
+              <View style={{ height: 18, justifyContent: 'flex-end' }}>
+                {day === markerDay && (
+                  <Image
+                    source={duckFrames.stand}
+                    style={{ width: 18, height: 18, transform: [{ scaleX: -1 }] }}
+                    resizeMode="contain"
+                  />
+                )}
+              </View>
+              <View
+                style={{
+                  alignSelf: 'stretch',
+                  height: 22,
+                  borderRadius: radii.sm / 2,
+                  backgroundColor: future
+                    ? predictedPhaseColor(dayPhase)
+                    : REAL_PHASE_COLOR[dayPhase],
+                  borderWidth: day === markerDay ? 2 : 0,
+                  borderColor: colors.ink,
+                }}
+              />
             </View>
-            <View
-              style={{
-                alignSelf: 'stretch',
-                height: 22,
-                borderRadius: radii.sm / 2,
-                backgroundColor: PHASE_COLOR[phaseForDay(day)],
-                borderWidth: day === dayOfCycle ? 2 : 0,
-                borderColor: colors.ink,
-              }}
-            />
-          </View>
-        ))}
+          );
+        })}
       </View>
     </View>
   );

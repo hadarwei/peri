@@ -1,8 +1,9 @@
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 
 import { useDuck } from '../../src/duck/DuckProvider';
+import { Card } from '../../src/components/Card';
 import { CycleStrip } from '../../src/components/CycleStrip';
 import { DidYouKnowCard } from '../../src/components/today/DidYouKnowCard';
 import { MoodRow } from '../../src/components/today/MoodRow';
@@ -13,19 +14,35 @@ import { t } from '../../src/i18n';
 import { useDuckWalker } from '../../src/components/DuckWalker';
 import { MEADOW_HEIGHT, MeadowScene } from '../../src/components/MeadowScene';
 import { DUCK_STATES, type DuckState } from '../../src/core/duckState';
-import { toLocalDateString } from '../../src/core/dates';
+import { addDays, parseLocalDate, toLocalDateString } from '../../src/core/dates';
+import { calculateStreak } from '../../src/core/streak';
+import { DEFAULT_RANGE_DAYS, todayCycle, type TodayCycle } from '../../src/core/todayCycle';
 import { getDb } from '../../src/db';
-import { countDayLogs, upsertDayLog } from '../../src/db/repos';
+import { notifyDataChanged, useDataVersion } from '../../src/db/dataVersion';
+import { saveCheckIn } from '../../src/db/saveCheckIn';
+import {
+  countCycles,
+  countDayLogs,
+  getCheckinDates,
+  getLatestCycle,
+  recordCheckin,
+  startCycle,
+  upsertDayLog,
+} from '../../src/db/repos';
 import { colors, MIN_TOUCH, radii, type } from '../../src/theme';
 
 export default function TodayScreen() {
   const { width } = useWindowDimensions();
+  const router = useRouter();
   const { celebrate, sayHello } = useDuck();
   const [duckState, setDuckState] = useState<DuckState>('normal'); // dev picker for now
   const duckLayers = useDuckWalker(width, MEADOW_HEIGHT, duckState);
   const [count, setCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [cycle, setCycle] = useState<TodayCycle | null>(null); // null: no cycle recorded yet
+  const dataVersion = useDataVersion();
 
   // A friendly cloud when the screen opens (after a short pause so the screen settles first).
   useEffect(() => {
@@ -33,23 +50,97 @@ export default function TodayScreen() {
     return () => clearTimeout(timer);
   }, [sayHello]);
 
-  // Re-count every time this tab comes into focus (and on first open).
+  // Opening the Today screen counts as a check-in (it keeps the streak alive).
   useFocusEffect(
     useCallback(() => {
-      let alive = true;
       (async () => {
         try {
-          const n = await countDayLogs(await getDb());
-          if (alive) setCount(n);
-        } catch (e) {
-          if (alive) setError(String(e));
+          await recordCheckin(await getDb(), toLocalDateString(new Date()));
+          notifyDataChanged();
+        } catch {
+          // Not being able to record a visit must never get in the user's way.
         }
       })();
-      return () => {
-        alive = false;
-      };
     }, []),
   );
+
+  // Re-read what this screen shows whenever something was saved (also after the check-in closes).
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const db = await getDb();
+        const [n, dates, latest] = await Promise.all([
+          countDayLogs(db),
+          getCheckinDates(db),
+          getLatestCycle(db),
+        ]);
+        if (!alive) return;
+        setCount(n);
+        setCycle(latest ? todayCycle(latest.startDate, toLocalDateString(new Date())) : null);
+        setStreak(calculateStreak(dates, toLocalDateString(new Date())));
+      } catch (e) {
+        if (alive) setError(String(e));
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [dataVersion]);
+
+  const quickMood = async (mood: number) => {
+    try {
+      await saveCheckIn(await getDb(), toLocalDateString(new Date()), { mood }, true);
+      notifyDataChanged();
+    } catch (e) {
+      setError(String(e));
+    }
+    celebrate();
+  };
+
+  const seedCycle = async () => {
+    try {
+      const db = await getDb();
+      if ((await countCycles(db)) > 0) {
+        setSaved(t('dev.seedExists')); // never pile test data on top of existing cycles
+        return;
+      }
+      const today = parseLocalDate(toLocalDateString(new Date()));
+      const day = (ago: number) => toLocalDateString(addDays(today, -ago));
+      // Three cycles of 28 days; the latest started 26 days ago (so the period is expected soon).
+      for (const ago of [82, 54, 26]) await startCycle(db, day(ago), 'logged');
+      // A handful of logged days so the calendar shows dots.
+      for (const ago of [80, 78, 70, 55, 52, 40, 30, 27, 25, 24, 20, 10, 5, 2, 1]) {
+        await upsertDayLog(db, day(ago), { mood: 3 + (ago % 3) });
+      }
+      setSaved(t('dev.seedCreated'));
+      notifyDataChanged();
+    } catch (e) {
+      setError(String(e));
+    }
+  };
+
+  const resetCycles = () => {
+    // Wipes everything: ask first, so it is never done by accident.
+    Alert.alert(t('dev.resetCycles'), t('dev.resetConfirm'), [
+      { text: t('editCycle.cancel'), style: 'cancel' },
+      {
+        text: t('editCycle.confirmDelete'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const db = await getDb();
+            await db.runAsync('DELETE FROM cycles');
+            await db.runAsync('DELETE FROM day_logs');
+            setSaved(t('dev.resetDone'));
+            notifyDataChanged();
+          } catch (e) {
+            setError(String(e));
+          }
+        },
+      },
+    ]);
+  };
 
   const addTestLog = async () => {
     try {
@@ -57,7 +148,7 @@ export default function TodayScreen() {
       const db = await getDb();
       const mood = 1 + Math.floor(Math.random() * 5);
       const log = await upsertDayLog(db, toLocalDateString(new Date()), { mood });
-      setCount(await countDayLogs(db)); // update the number right away from the database
+      notifyDataChanged();
       celebrate(); // saving a log makes the duck dance
       setSaved(`${log.date} · ${new Date().toLocaleTimeString('he-IL')}`);
     } catch (e) {
@@ -72,27 +163,62 @@ export default function TodayScreen() {
     >
       <MeadowScene behind={duckLayers.behind} front={duckLayers.front} />
       <View style={{ padding: 16, gap: 16 }}>
-        {/* Static sample data until stage 6 computes the real cycle (day 12 of 28). */}
-        <CycleStrip dayOfCycle={12} />
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          <PredictionCard
-            title={t('predictions.nextPeriod')}
-            daysExpected={16}
-            daysFrom={14}
-            daysTo={18}
-            accent={colors.period}
-          />
-          <PredictionCard
-            title={t('predictions.ovulation')}
-            daysExpected={2}
-            daysFrom={1}
-            daysTo={4}
-            accent={colors.fertile}
-          />
-        </View>
-        {/* Tapping a face only celebrates for now; saving the mood arrives in stage 3. */}
-        <MoodRow onPick={celebrate} />
-        <StreakCard days={5} />
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push('/checkin')}
+          style={{
+            minHeight: MIN_TOUCH + 8,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: radii.card,
+            backgroundColor: colors.primary,
+          }}
+        >
+          <Text style={[type.heading, { color: '#FFFFFF' }]}>{t('checkin.open')}</Text>
+        </Pressable>
+        {cycle ? (
+          <>
+            {/* Stand-in prediction (28 days from the last start) until stage 6. */}
+            <CycleStrip dayOfCycle={cycle.dayOfCycle} />
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <PredictionCard
+                title={t('predictions.nextPeriod')}
+                daysExpected={cycle.daysToPeriod}
+                passedMeans="late"
+                rangeDays={DEFAULT_RANGE_DAYS}
+                accent={colors.period}
+              />
+              <PredictionCard
+                title={t('predictions.ovulation')}
+                daysExpected={cycle.daysToOvulation}
+                passedMeans="passed"
+                rangeDays={DEFAULT_RANGE_DAYS}
+                accent={colors.fertile}
+              />
+            </View>
+          </>
+        ) : (
+          <Card>
+            <Text style={[type.heading, { color: colors.ink }]}>{t('today.noCycle')}</Text>
+            <Text style={[type.body, { color: colors.muted }]}>{t('today.noCycleBody')}</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push('/add-cycle')}
+              style={{
+                minHeight: MIN_TOUCH,
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderRadius: radii.pill,
+                backgroundColor: colors.primary,
+              }}
+            >
+              <Text style={[type.label, { color: '#FFFFFF' }]}>{t('addCycle.open')}</Text>
+            </Pressable>
+          </Card>
+        )}
+        {/* A tap on a face saves today's mood (and counts as a check-in) and the duck celebrates. */}
+        <MoodRow onPick={quickMood} />
+        <StreakCard days={streak} />
         <DidYouKnowCard fact={FACTS[0]} />
         {/* Dev-only picker for the duck's look (the real state comes from the cycle in stage 6). */}
         {__DEV__ && (
@@ -139,10 +265,20 @@ export default function TodayScreen() {
             >
               <Text style={[type.label, { color: '#FFFFFF' }]}>{t('dev.addTestLog')}</Text>
             </Pressable>
+            <Pressable
+              onPress={seedCycle}
+              style={{ minHeight: MIN_TOUCH, justifyContent: 'center' }}
+            >
+              <Text style={[type.label, { color: colors.primary }]}>{t('dev.seedCycle')}</Text>
+            </Pressable>
+            <Pressable
+              onPress={resetCycles}
+              style={{ minHeight: MIN_TOUCH, justifyContent: 'center' }}
+            >
+              <Text style={[type.label, { color: '#B00020' }]}>{t('dev.resetCycles')}</Text>
+            </Pressable>
             {saved && (
-              <Text style={[type.caption, { color: colors.muted }]}>
-                {`${t('dev.saved')}: ${saved}`}
-              </Text>
+              <Text style={[type.label, { color: colors.ink, textAlign: 'center' }]}>{saved}</Text>
             )}
             {error && (
               <Text style={[type.caption, { color: '#B00020' }]}>
