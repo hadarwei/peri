@@ -1,7 +1,7 @@
 {
   "app": "peri",
   "version": "V1 (manual)",
-  "updated": "2026-10-31",
+  "updated": "2026-11-03",
   "principles": [
     "local-only data",
     "no network calls",
@@ -63,7 +63,7 @@
     },
     "3": {
       "name": "daily log, calendar, history",
-      "status": "in_progress",
+      "status": "done",
       "done": [
         "P3.1/3.2 getTodayCards (src/core/todayCards.ts) tests first, 19 cases",
         "P3.3 check-in modal (app/checkin.tsx): mood, same as yesterday, top-3 symptom chips (topSymptoms), collapsed more details (flow/pain/energy/note)",
@@ -78,15 +78,12 @@
         "styling: predicted calendar days are grayish with light dashes + legend entry",
         "user feedback round (2026-11-03): vivid real colours + mostly-gray predicted colours shared via src/theme/calendarColors.ts (calendar, legend, Today strip); Today strip + prediction cards now read the latest cycle (src/core/todayCycle.ts) and show a prompt to add a cycle when none; add/edit cycle also sets period length + flow (src/db/periodDays.ts); history cards show a menu icon + hint; dev wipe button asks for confirmation; seed refuses when cycles exist"
       ],
-      "next": [
-        "CHECK 3d (phone): add/edit/delete cycles, full flow",
-        "merge stage/3-log-calendar into main, tag stage-3-done",
-        "then stage 4 temperature + reminders"
-      ]
+      "next": [],
+      "tag": "stage-3-done"
     },
     "4": {
       "name": "temperature and reminders",
-      "status": "todo"
+      "status": "next"
     },
     "5": {
       "name": "fertility test photos",
@@ -182,9 +179,6 @@
     "test_photos",
     "settings",
     "checkins"
-  ],
-  "open_questions": [
-    "user reported \"delete cycle deletes all history\": per-cycle delete is tested to remove exactly one cycle and keep day logs; suspected the dev wipe button (similar name, no confirm) - awaiting confirmation which button was used; user reported seed button did nothing - added visible feedback, awaiting repro"
   ],
   "lessons": [
     "Jest cannot switch TZ: scripts/test-tz.js runs date tests per zone",
